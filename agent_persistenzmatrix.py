@@ -12,7 +12,6 @@ Features:
   - iCloud-kompatibler DB-Zugriff (immutable/readonly Fallbacks)
   - Dynamische Score-Schwellen aus feiertag_config
   - Persistenz-Score mit Trend-Analyse
-  - Durchschnittlicher Score (Avg) als Trading-Kriterium (>=8 = Trading-Ready)
   - Kategorisierung: Live-Ready / Watchlist / Neue Signale
   - JSON-Export fuer Trading-Agent
 
@@ -41,20 +40,20 @@ MIN_SCORE_TOP = 8
 DEFAULT_DAYS = 20
 
 # Liquiditaetsfilter (2-von-3 Regel)
-SCREEN_MIN_PRICE = 20
-SCREEN_MIN_VOLUME = 500_000
-SCREEN_MIN_DOLLAR_VOL = 10_000_000
-LIQUIDITY_TOLERANCE = 0.30
+SCREEN_MIN_PRICE = 20           # USD — Ollis Empfehlung
+SCREEN_MIN_VOLUME = 500_000     # Shares/Tag
+SCREEN_MIN_DOLLAR_VOL = 10_000_000  # USD/Tag
+LIQUIDITY_TOLERANCE = 0.30      # 30% Toleranz fuer 3. Kriterium
 
 # Scoring-Schwellen
-SCORE_NEAR_HIGH_PCT = 25
-SCORE_ABOVE_LOW_PCT = 25
-SCORE_REV_GROWTH_HIGH = 50
-SCORE_REV_GROWTH_MED = 20
-SCORE_EARN_GROWTH_MIN = 20
-SCORE_MAX_DIVIDEND_PCT = 0.5
+SCORE_NEAR_HIGH_PCT = 25        # K04: Max Abstand zum 52W-Hoch
+SCORE_ABOVE_LOW_PCT = 25        # K05: Min Abstand zum 52W-Tief
+SCORE_REV_GROWTH_HIGH = 50      # K06+K07: Revenue >50% = 2 Pkt
+SCORE_REV_GROWTH_MED = 20       # K06: Revenue >20% = 1 Pkt
+SCORE_EARN_GROWTH_MIN = 20      # K08: Earnings >20%
+SCORE_MAX_DIVIDEND_PCT = 0.5    # K09: Keine Dividende
 SCORE_TECH_SECTORS = ['Technology', 'Communication Services', 'Financial Services']
-SCORE_MIN_PERF_3M = 0
+SCORE_MIN_PERF_3M = 0           # K11: 3M-Perf > 0%
 
 # DB-Suchpfade
 DEFAULT_DB_PATHS = [
@@ -139,6 +138,7 @@ def load_trading_days(con, end_date, num_days):
 
 
 def load_raw_data(con, dates):
+    """Lade ALLE Rohdaten fuer die Boersentage."""
     if not dates:
         return {}
     ph = ','.join('?' * len(dates))
@@ -167,6 +167,7 @@ def load_raw_data(con, dates):
 
 
 def load_fundamentals(con):
+    """Lade Revenue/Earnings YoY Growth aus v_fin_perf_001."""
     try:
         rows = con.execute("""
             SELECT sym,
@@ -183,6 +184,7 @@ def load_fundamentals(con):
 
 
 def load_sectors(con):
+    """Lade Sektor-Info aus Stammdaten."""
     try:
         rows = con.execute(
             "SELECT std_sym, std_sector FROM t_std_stammdaten WHERE std_sector IS NOT NULL AND std_sector != ''"
@@ -193,22 +195,25 @@ def load_sectors(con):
 
 
 # ==============================================================
-# SCORING (11 Kriterien)
+# SCORING (11 Kriterien, identisch mit feiertag_daily_report)
 # ==============================================================
 def score_ticker(raw, fundamentals, sectors, ticker):
     """Berechne Score /11 fuer einen Ticker-Tag.
 
-    VORFILTER: Liquiditaetscheck (2-von-3 Regel)
-    K01+K02: Phase-2     = 2 Pkt
-    K03:     Golden Cross = 1 Pkt
-    K04:     < 25% unter 52W-Hoch = 1 Pkt
-    K05:     > 25% ueber 52W-Tief = 1 Pkt
-    K06+K07: Revenue Growth YoY   = 1-2 Pkt
-    K08:     Earnings Growth YoY  = 1 Pkt
-    K09:     Keine Dividende      = 1 Pkt
-    K10:     Tech Sektor          = 1 Pkt
-    K11:     3M-Perf > 0%         = 1 Pkt
+    VORFILTER: Liquiditaetscheck (2-von-3 Regel) — wer nicht besteht: None
+    K01+K02: Phase-2 (Kurs>SMA200 steigend + >SMA50)     = 2 Pkt
+    K03:     Golden Cross (SMA50 > SMA200 mit Toleranz)    = 1 Pkt
+    K04:     < 25% unter 52W-Hoch                          = 1 Pkt
+    K05:     > 25% ueber 52W-Tief (Proxy via abst_hoch)   = 1 Pkt
+    K06+K07: Revenue Growth YoY (>20%=1, >50%=2)          = 1-2 Pkt
+    K08:     Earnings Growth YoY > 20%                     = 1 Pkt
+    K09:     Keine Dividende                               = 1 Pkt (TODO)
+    K10:     Tech/Scalable Sektor                          = 1 Pkt
+    K11:     3M-Performance > 0%                           = 1 Pkt
+
+    Returns: (score, score_max) oder (None, None) wenn Vorfilter nicht bestanden
     """
+    # VORFILTER: Liquiditaet
     kurs = raw.get('kurs')
     avg_vol = raw.get('avg_vol')
     if not liquidity_check(kurs, avg_vol):
@@ -217,20 +222,30 @@ def score_ticker(raw, fundamentals, sectors, ticker):
     score = 0
     score_max = 11
 
+    # K01+K02: Phase-2
     if raw.get('phase2'):
         score += 2
+
+    # K03: Golden Cross
     if raw.get('golden_cross'):
         score += 1
 
+    # K04: Nahe am 52W-Hoch (Abstand <= 25%)
     abst = raw.get('abst_hoch')
     if abst is not None and abs(abst) <= SCORE_NEAR_HIGH_PCT:
         score += 1
 
+    # K05: > 25% ueber 52W-Tief
+    # Kein abst_tief in DB, daher Proxy:
+    #   Wenn Phase2 aktiv (Kurs > SMA200 > SMA50), ist Aktie typischerweise
+    #   weit ueber dem 52W-Tief. Konservativ: nur 1 Punkt wenn Phase2
+    #   ODER wenn Abstand zum Hoch moderat (>-50% = Kurs hat sich erholt)
     if raw.get('phase2'):
         score += 1
     elif abst is not None and abst > -50:
         score += 1
 
+    # K06+K07: Revenue Growth
     fund = fundamentals.get(ticker, {})
     rev_g = fund.get('rev_growth')
     if rev_g is not None:
@@ -242,6 +257,7 @@ def score_ticker(raw, fundamentals, sectors, ticker):
     else:
         score_max -= 2
 
+    # K08: Earnings Growth
     earn_g = fund.get('earn_growth')
     if earn_g is not None:
         if earn_g * 100 >= SCORE_EARN_GROWTH_MIN:
@@ -249,12 +265,15 @@ def score_ticker(raw, fundamentals, sectors, ticker):
     else:
         score_max -= 1
 
-    score += 1  # K09: TODO echte Dividenden-Daten
+    # K09: Keine Dividende (TODO: echte Daten)
+    score += 1
 
+    # K10: Tech Sektor
     sector = sectors.get(ticker, '')
     if sector in SCORE_TECH_SECTORS:
         score += 1
 
+    # K11: 3M-Performance > 0%
     p3m = raw.get('perf_3m')
     if p3m is not None and p3m > SCORE_MIN_PERF_3M:
         score += 1
@@ -263,22 +282,28 @@ def score_ticker(raw, fundamentals, sectors, ticker):
 
 
 # ==============================================================
-# SCORING FUER ALLE TAGE
+# SCORING FUER ALLE TAGE BERECHNEN
 # ==============================================================
 def compute_all_scores(raw_data, dates, fundamentals, sectors):
-    scored = {}
-    for ticker in set(raw_data.keys()):
+    """Berechne Scores fuer alle Ticker und alle Tage."""
+    scored = {}  # ticker -> {datum -> {score, max, ...}}
+
+    all_tickers = set(raw_data.keys())
+
+    for ticker in all_tickers:
         t_dates = raw_data[ticker]
         scored[ticker] = {}
+
         for d in dates:
             if d not in t_dates:
                 continue
             raw = t_dates[d]
             s, mx = score_ticker(raw, fundamentals, sectors, ticker)
             if s is None:
-                continue
+                continue  # Vorfilter nicht bestanden
             scored[ticker][d] = {
-                'score': s, 'max': mx,
+                'score': s,
+                'max': mx,
                 'phase2': raw.get('phase2', 0),
                 'kurs': raw.get('kurs'),
                 'perf_1d': raw.get('perf_1d'),
@@ -289,10 +314,12 @@ def compute_all_scores(raw_data, dates, fundamentals, sectors):
                 'sma200': raw.get('sma200'),
                 'avg_vol': raw.get('avg_vol'),
             }
+
     return scored
 
 
 def filter_qualified(scored, dates):
+    """Filtere: nur Ticker die mindestens 1x die Score-Schwelle erreicht haben."""
     qualified = {}
     for ticker, t_data in scored.items():
         for d in dates:
@@ -307,7 +334,9 @@ def filter_qualified(scored, dates):
 # PERSISTENZ-ANALYSE
 # ==============================================================
 def analyze_persistence(data, dates):
+    """Berechne Persistenz-Metriken pro Ticker."""
     analysis = {}
+
     for ticker, t_data in data.items():
         scores = []
         above_threshold_days = 0
@@ -324,6 +353,7 @@ def analyze_persistence(data, dates):
         if not scores:
             continue
 
+        # Letzter Tag
         last_day = None
         for d in reversed(dates):
             if d in t_data:
@@ -332,12 +362,14 @@ def analyze_persistence(data, dates):
         if not last_day:
             continue
 
+        # Trend
         recent = scores[-5:] if len(scores) >= 5 else scores
         older = scores[-10:-5] if len(scores) >= 10 else scores[:max(1, len(scores)//2)]
         r_avg = sum(recent) / len(recent)
         o_avg = sum(older) / len(older) if older else r_avg
         trend = 'up' if r_avg > o_avg + 0.5 else ('down' if r_avg < o_avg - 0.5 else 'stable')
 
+        # Streak
         streak = 0
         for d in reversed(dates):
             info = t_data.get(d)
@@ -346,8 +378,8 @@ def analyze_persistence(data, dates):
             else:
                 break
 
-        persistence_pct = round(above_threshold_days / total_days * 100) if total_days > 0 else 0
-        avg_score = round(sum(scores) / len(scores), 1)
+        # Fehlende Tage = Score 0 → Nenner ist IMMER Gesamtzahl Handelstage
+        persistence_pct = round(above_threshold_days / len(dates) * 100) if len(dates) > 0 else 0
         rank_score = (
             persistence_pct * 0.60 +
             (last_day['score'] / max(last_day['max'], 1) * 100) * 0.25 +
@@ -358,7 +390,7 @@ def analyze_persistence(data, dates):
             'persistence_pct': persistence_pct,
             'above_threshold_days': above_threshold_days,
             'total_days': total_days,
-            'avg_score': avg_score,
+            'avg_score': round(sum(scores) / len(dates), 1),  # fehlende Tage = 0
             'current_score': last_day['score'],
             'current_max': last_day['max'],
             'current_kurs': last_day.get('kurs'),
@@ -377,14 +409,14 @@ def analyze_persistence(data, dates):
 # HTML GENERATION
 # ==============================================================
 def generate_html(data, dates, ranked_tickers, analysis, generation_date):
-    trend_icons = {'up': '\u25b2', 'down': '\u25bc', 'stable': '\u25ba'}
+    trend_icons = {'up': '▲', 'down': '▼', 'stable': '►'}
     trend_colors = {'up': '#00b894', 'down': '#d63031', 'stable': '#fdcb6e'}
 
     html = []
     html.append('<!DOCTYPE html>')
     html.append('<html lang="de"><head><meta charset="utf-8">')
     html.append('<meta name="viewport" content="width=device-width, initial-scale=1">')
-    html.append(f'<title>Persistenzmatrix \u2014 {generation_date}</title>')
+    html.append(f'<title>Persistenzmatrix — {generation_date}</title>')
     html.append("""<style>
 :root {
   --bg: #0f0f1a; --surface: #1a1a2e; --surface2: #16213e;
@@ -470,14 +502,15 @@ thead .col-ticker { z-index: 15; }
 }
 </style></head><body>""")
 
-    html.append(f'<h1>Persistenzmatrix \u2014 AI Artifakte</h1>')
-    html.append(f'<div class="meta">Stand: {generation_date} | {len(dates)} B\u00f6rsentage | {len(ranked_tickers)} Ticker qualifiziert | Agent B1 v1.1</div>')
+    # Header
+    html.append(f'<h1>Persistenzmatrix — AI Artifakte</h1>')
+    html.append(f'<div class="meta">Stand: {generation_date} | {len(dates)} Börsentage | {len(ranked_tickers)} Ticker qualifiziert | Agent B1 v1.0</div>')
 
+    # Statistik-Cards
     total = len(ranked_tickers)
     live_ready = sum(1 for t in ranked_tickers
                      if analysis[t]['persistence_pct'] >= 70
                      and analysis[t]['current_score'] >= score_threshold(analysis[t]['current_max'] or 11))
-    trading_ready = sum(1 for t in ranked_tickers if analysis[t]['avg_score'] >= 8.0 and analysis[t]['persistence_pct'] >= 70)
     trending_up = sum(1 for t in ranked_tickers if analysis[t]['trend'] == 'up')
     avg_persist = round(sum(analysis[t]['persistence_pct'] for t in ranked_tickers) / total) if total > 0 else 0
 
@@ -485,38 +518,39 @@ thead .col-ticker { z-index: 15; }
     html.append(f'<div class="stat-card"><div class="label">Qualifiziert</div><div class="value">{total}</div></div>')
     cls = '' if live_ready >= 10 else ('warn' if live_ready >= 5 else 'bad')
     html.append(f'<div class="stat-card"><div class="label">Live-Ready</div><div class="value {cls}">{live_ready}</div></div>')
-    html.append(f'<div class="stat-card"><div class="label">\u2205 \u2265 8 Trading</div><div class="value">{trading_ready}</div></div>')
-    html.append(f'<div class="stat-card"><div class="label">Trend \u25b2</div><div class="value">{trending_up}</div></div>')
+    html.append(f'<div class="stat-card"><div class="label">Trend ▲</div><div class="value">{trending_up}</div></div>')
     cls2 = '' if avg_persist >= 50 else ('warn' if avg_persist >= 30 else 'bad')
-    html.append(f'<div class="stat-card"><div class="label">\u2205 Persistenz</div><div class="value {cls2}">{avg_persist}%</div></div>')
+    html.append(f'<div class="stat-card"><div class="label">∅ Persistenz</div><div class="value {cls2}">{avg_persist}%</div></div>')
     html.append('</div>')
 
+    # Filter
     html.append('''<div class="filters">
       <label>Filter:</label>
       <select id="filterCat" onchange="applyFilter()">
         <option value="all">Alle</option>
-        <option value="live">Live-Ready (\u226570%)</option>
+        <option value="live">Live-Ready (≥70%)</option>
         <option value="watch">Watchlist (40-69%)</option>
-        <option value="new">Neue Signale (\u226439%)</option>
+        <option value="new">Neue Signale (≤39%)</option>
       </select>
       <select id="filterTrend" onchange="applyFilter()">
         <option value="all">Alle Trends</option>
-        <option value="up">\u25b2 Steigend</option>
-        <option value="stable">\u25ba Stabil</option>
-        <option value="down">\u25bc Fallend</option>
+        <option value="up">▲ Steigend</option>
+        <option value="stable">► Stabil</option>
+        <option value="down">▼ Fallend</option>
       </select>
       <select id="filterAvg" onchange="applyFilter()">
-        <option value="all">Alle \u2205</option>
-        <option value="8">\u2205 \u2265 8 (Trading)</option>
-        <option value="7">\u2205 \u2265 7</option>
+        <option value="all">Alle ∅</option>
+        <option value="8">∅ ≥ 8 (Trading)</option>
+        <option value="7">∅ ≥ 7</option>
       </select>
       <input type="text" id="filterTicker" placeholder="Ticker suchen..." oninput="applyFilter()" style="width:100px;">
     </div>''')
 
+    # Tabelle
     html.append('<div class="matrix-wrap"><table id="matrix"><thead><tr>')
     html.append('<th class="col-ticker">Ticker</th>')
     html.append('<th class="col-persist">P%</th>')
-    html.append('<th class="col-avg" title="Durchschnittlicher Score ueber alle Tage">\u2205</th>')
+    html.append('<th class="col-avg" title="Durchschnittlicher Score ueber alle Tage">∅</th>')
     html.append('<th class="col-trend">T</th>')
     html.append('<th class="col-streak">Str</th>')
     html.append('<th class="col-meta">Kurs</th>')
@@ -527,11 +561,12 @@ thead .col-ticker { z-index: 15; }
         html.append(f'<th>{d[5:]}<br><span style="font-size:9px;color:#555">{wd}</span></th>')
     html.append('</tr></thead><tbody>')
 
+    # Kategorien
     categories = {'live': [], 'watch': [], 'new': []}
     cat_labels = {
-        'live': 'LIVE-READY \u2014 Persistenz \u2265 70%, aktuell \u00fcber Schwelle',
-        'watch': 'WATCHLIST \u2014 Persistenz 40-69%',
-        'new': 'NEUE SIGNALE \u2014 Persistenz < 40%',
+        'live': 'LIVE-READY — Persistenz ≥ 70%, aktuell über Schwelle',
+        'watch': 'WATCHLIST — Persistenz 40-69%',
+        'new': 'NEUE SIGNALE — Persistenz < 40%',
     }
 
     for ticker in ranked_tickers:
@@ -572,12 +607,12 @@ thead .col-ticker { z-index: 15; }
 
             kurs_str = f"${a['current_kurs']:.2f}" if a['current_kurs'] else '-'
             hoch_str = f"{a['abst_hoch']:.0f}%" if a['abst_hoch'] is not None else '-'
-            avg_s = a['avg_score']
-            avg_cls = 'avg-high' if avg_s >= 8 else ('avg-med' if avg_s >= 7 else 'avg-low')
 
-            html.append(f'<tr data-cat="{cat_key}" data-trend="{a["trend"]}" data-ticker="{ticker}" data-avg="{avg_s:.1f}">')
+            html.append(f'<tr data-cat="{cat_key}" data-trend="{a["trend"]}" data-ticker="{ticker}" data-avg="{a["avg_score"]:.1f}">')
             html.append(f'<td class="col-ticker">{ticker}{badge}</td>')
             html.append(f'<td class="col-persist"><span class="persist-bar {p_cls}" style="width:{bar_w}px"></span>{pp}%</td>')
+            avg_s = a['avg_score']
+            avg_cls = 'avg-high' if avg_s >= 8 else ('avg-med' if avg_s >= 7 else 'avg-low')
             html.append(f'<td class="col-avg {avg_cls}">{avg_s:.1f}</td>')
             html.append(f'<td class="col-trend" style="color:{trend_col}">{trend_icon}</td>')
             html.append(f'<td class="col-streak">{a["streak"]}d</td>')
@@ -593,12 +628,13 @@ thead .col-ticker { z-index: 15; }
                     above = ' above-thresh' if s >= score_threshold(mx) else ''
                     html.append(f'<td class="{cls}{above}">{s}/{mx}</td>')
                 else:
-                    html.append('<td class="empty">\u00b7</td>')
+                    html.append('<td class="empty">·</td>')
 
             html.append('</tr>')
 
     html.append('</tbody></table></div>')
 
+    # JavaScript
     html.append("""<script>
 function applyFilter() {
   const cat = document.getElementById('filterCat').value;
@@ -620,7 +656,7 @@ function applyFilter() {
 }
 </script>""")
 
-    html.append(f'<div class="meta" style="margin-top:12px;">AI Artifakte \u2014 Agent B1 Persistenzmatrix v1.1 | Generiert: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>')
+    html.append(f'<div class="meta" style="margin-top:12px;">AI Artifakte — Agent B1 Persistenzmatrix v1.0 | Generiert: {datetime.now().strftime("%Y-%m-%d %H:%M")}</div>')
     html.append('</body></html>')
     return '\n'.join(html)
 
@@ -638,10 +674,10 @@ def generate_json(ranked_tickers, analysis, dates, data):
             'live_ready': sum(1 for t in ranked_tickers
                              if analysis[t]['persistence_pct'] >= 70
                              and analysis[t]['current_score'] >= score_threshold(analysis[t]['current_max'] or 11)),
+            'trending_up': sum(1 for t in ranked_tickers if analysis[t]['trend'] == 'up'),
             'trading_ready_avg8': sum(1 for t in ranked_tickers
                                       if analysis[t]['avg_score'] >= 8.0
                                       and analysis[t]['persistence_pct'] >= 70),
-            'trending_up': sum(1 for t in ranked_tickers if analysis[t]['trend'] == 'up'),
         },
         'tickers': {}
     }
@@ -656,9 +692,9 @@ def generate_json(ranked_tickers, analysis, dates, data):
             else:
                 daily.append({'date': d, 'score': None, 'max': None})
         output['tickers'][ticker] = {
+            'avg_score': a['avg_score'],
             'rank_score': a['rank_score'],
             'persistence_pct': a['persistence_pct'],
-            'avg_score': a['avg_score'],
             'trend': a['trend'],
             'streak': a['streak'],
             'current_score': a['current_score'],
@@ -676,7 +712,7 @@ def generate_json(ranked_tickers, analysis, dates, data):
 # HAUPTPROGRAMM
 # ==============================================================
 def main():
-    parser = argparse.ArgumentParser(description='AI Artifakte \u2014 Agent B1: Persistenzmatrix')
+    parser = argparse.ArgumentParser(description='AI Artifakte — Agent B1: Persistenzmatrix')
     parser.add_argument('--days', type=int, default=DEFAULT_DAYS, help='Anzahl Boersentage')
     parser.add_argument('--date', default=date.today().isoformat(), help='Enddatum')
     parser.add_argument('--db', help='Pfad zur feiertag_trading.db')
@@ -691,6 +727,7 @@ def main():
 
     log("=== Persistenzmatrix-Agent gestartet ===")
 
+    # 1. DB finden und verbinden
     try:
         db_path = find_database(args.db)
         log(f"DB: {db_path}")
@@ -705,6 +742,7 @@ def main():
         print(f"FEHLER: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # 2. Boersentage laden
     dates = load_trading_days(con, args.date, args.days)
     if not dates:
         log("FEHLER: Keine Daten in daily_screen")
@@ -712,6 +750,7 @@ def main():
         sys.exit(1)
     log(f"Zeitraum: {dates[0]} bis {dates[-1]} ({len(dates)} Tage)")
 
+    # 3. Rohdaten + Fundamentals + Sektoren laden
     log("Lade Rohdaten...")
     raw_data = load_raw_data(con, dates)
     log(f"Rohdaten: {len(raw_data)} Ticker")
@@ -725,16 +764,19 @@ def main():
     log(f"Sektoren: {len(sectors)} Ticker mit Sektor")
     con.close()
 
+    # 4. Scores berechnen
     log("Berechne Scores /11 fuer alle Ticker und Tage...")
     scored = compute_all_scores(raw_data, dates, fundamentals, sectors)
     log(f"Scores berechnet: {len(scored)} Ticker")
 
+    # 5. Qualifizierte Ticker filtern
     qualified = filter_qualified(scored, dates)
     log(f"Qualifiziert (>= Schwelle an mind. 1 Tag): {len(qualified)} Ticker")
 
     if not qualified:
         log("WARNUNG: Keine Ticker haben die Score-Schwelle erreicht")
 
+    # 6. Persistenz analysieren
     analysis = analyze_persistence(qualified, dates)
     ranked = sorted(analysis.keys(), key=lambda t: -analysis[t]['rank_score'])
     log(f"Analysiert: {len(ranked)} Ticker mit Persistenz-Ranking")
@@ -742,16 +784,15 @@ def main():
     live_ready = [t for t in ranked
                   if analysis[t]['persistence_pct'] >= 70
                   and analysis[t]['current_score'] >= score_threshold(analysis[t]['current_max'] or 11)]
-    trading_avg8 = [t for t in live_ready if analysis[t]['avg_score'] >= 8.0]
     log(f"Live-Ready: {len(live_ready)} Ticker")
-    log(f"Trading-Ready (Avg>=8): {len(trading_avg8)} Ticker")
-    if trading_avg8:
+    if live_ready:
         top5 = ', '.join(
-            f"{t} (\u2205{analysis[t]['avg_score']:.1f}, {analysis[t]['current_score']}/{analysis[t]['current_max']})"
-            for t in trading_avg8[:5]
+            f"{t} ({analysis[t]['current_score']}/{analysis[t]['current_max']}, P:{analysis[t]['persistence_pct']}%)"
+            for t in live_ready[:5]
         )
         log(f"  Top 5: {top5}")
 
+    # 7. Output
     out_dir = Path(args.output) if args.output else Path(__file__).resolve().parent
     out_dir.mkdir(parents=True, exist_ok=True)
 
