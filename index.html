@@ -24,6 +24,7 @@
   .badge.live { background: rgba(72,187,120,0.15); color: #48bb78; }
   .badge.soon { background: rgba(66,153,225,0.15); color: #63b3ed; }
   .badge.planned { background: rgba(74,85,104,0.3); color: #6b7c93; }
+  .badge.new { background: rgba(237,137,54,0.15); color: #ed8936; }
   .footer { text-align: center; padding-top: 30px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.8rem; }
   .footer a { color: #4a5568; text-decoration: none; }
   .footer a:hover { color: #63b3ed; }
@@ -37,14 +38,40 @@
     <div class="phase"><span class="dot"></span> Phase 1 &ndash; Datenbeschaffung</div>
   </div>
 
-  <div class="section-label">Dashboard</div>
+  <div class="section-label">Architektur</div>
   <div class="nav-grid">
+    <a href="agenten-architektur-komplett.html" class="nav-card">
+      <div class="icon">&#x1F3D7;&#xFE0F;</div>
+      <h3>Agentenarchitektur (komplett)</h3>
+      <p>7 Agenten von SEC-Daten &uuml;ber Screening und Trading bis zum Tagebuch. Fort-Knox-Sicherheitskonzept.</p>
+      <span class="badge new">v2.0 Neu</span>
+    </a>
     <a href="konzept.html" class="nav-card">
       <div class="icon">&#x1F5FA;&#xFE0F;</div>
       <h3>Konzept&uuml;bersicht</h3>
       <p>Gesamt&uuml;bersicht der Trading-Pipeline: Alle 6 Phasen, Tech-Stack und Zeitplan.</p>
       <span class="badge live">Verf&uuml;gbar</span>
     </a>
+  </div>
+
+  <div class="section-label">Analyse</div>
+  <div class="nav-grid">
+    <a href="regelwerk-abgleich-feiertag-sec.html" class="nav-card">
+      <div class="icon">&#x1F50D;</div>
+      <h3>Abgleich Feiertag &harr; SEC</h3>
+      <p>Pr&auml;zises Mapping: 11 Scoring-Kriterien, XBRL-Felder, c-sec Regel, Datenquellen-Matrix, L&uuml;ckenanalyse.</p>
+      <span class="badge new">v1.0 Neu</span>
+    </a>
+    <a href="filing-uebersicht-q4-fehlend.html" class="nav-card">
+      <div class="icon">&#x1F4CB;</div>
+      <h3>Q4-Filing-&Uuml;bersicht</h3>
+      <p>394 Exchange-Listed Firmen mit fehlendem Q4-2025 10-K. Deadlines und Filing-Status.</p>
+      <span class="badge live">Verf&uuml;gbar</span>
+    </a>
+  </div>
+
+  <div class="section-label">Dashboard</div>
+  <div class="nav-grid">
     <a href="earnings.html" class="nav-card">
       <div class="icon">&#x1F4C5;</div>
       <h3>Earnings Kalender</h3>
