@@ -59,10 +59,13 @@
       Q<sub>10-K</sub> = Jahreswert (10-K) − Summe der drei 10-Q Quartale
     </div>
     <div class="example">
-      <strong>Beispiel (Fiscal Year End = Dezember):</strong><br>
+      <strong>Beispiel 1 – Fiscal Year End = Dezember (Standardfall):</strong><br>
       10-Q: Q1, Q2, Q3 vorhanden → Q4 = 10-K Jahreswert − (Q1 + Q2 + Q3)<br><br>
-      <strong>Beispiel (Fiscal Year End = September, z.B. Apple):</strong><br>
-      10-K deckt Q4 (Jul–Sep) ab → Q4 = 10-K − (Q1 + Q2 + Q3)
+      <strong>Beispiel 2 – Fiscal Year End = September (z.B. Apple):</strong><br>
+      10-K deckt Q4 (Jul–Sep) ab → Q4 = 10-K − (Q1 + Q2 + Q3)<br><br>
+      <strong>Beispiel 3 – Fiscal Year End = Juni (10-K im Q2):</strong><br>
+      10-Q berichten Q3, Q4, Q1 → Q2 = 10-K Jahreswert − (Q3 + Q4 + Q1)<br>
+      <em>Entscheidend: Immer die drei 10-Q Berichte abziehen, die vor dem 10-K eingereicht wurden — unabhängig davon, in welchem Kalenderquartal der 10-K fällt.</em>
     </div>
     <p>Diese Berechnung wahrt die <strong>Konsistenz</strong> — das resultierende Quartalsergebnis ist rechnerisch korrekt, auch wenn es kein explizites Q4-Filing gibt.</p>
   </div>
@@ -71,7 +74,7 @@
     <h2><span class="num">4</span> Mindest-Historie & Stichtag</h2>
     <ul>
       <li><strong>Mindestens 6 Quartale</strong> an Filings nötig (≈ 1,5 Jahre), um einen vollständigen YoY-Vergleich über mehrere Quartale berechnen zu können</li>
-      <li><strong>Stichtag-Regel:</strong> Ein Quartal gilt erst als “messbar”, wenn alle relevanten Firmen ihre Berichte eingereicht haben. Firmen berichten zu unterschiedlichen Zeitpunkten — Konsistenz erfordert, dass nur abgeschlossene Berichtszyklen verglichen werden</li>
+      <li><strong>Stichtag-Regel:</strong> Ein Quartal gilt erst als "messbar", wenn alle relevanten Firmen ihre Berichte eingereicht haben. Firmen berichten zu unterschiedlichen Zeitpunkten — Konsistenz erfordert, dass nur abgeschlossene Berichtszyklen verglichen werden</li>
       <li><strong>Aktuelles Quartal</strong> wird nicht gemessen (unvollständige Datenlage)</li>
     </ul>
   </div>
@@ -88,7 +91,7 @@
 
   <div class="rule-section">
     <h2><span class="num">6</span> Verwendete SEC-Kennzahl</h2>
-    <p>Als “Earnings” verwenden wir <strong>Net Income</strong> aus den SEC-Filings:</p>
+    <p>Als "Earnings" verwenden wir <strong>Net Income</strong> aus den SEC-Filings:</p>
     <p><span class="tag">XBRL</span> <code style="color:#63b3ed;">us-gaap:NetIncomeLoss</code></p>
     <p style="margin-top: 8px; font-size: 0.82rem; color: #6b7c93;">Hinweis: Die exakte XBRL-Taxonomie kann je nach Firma variieren. Fallback-Felder und Mapping werden in der Daten-Pipeline definiert.</p>
   </div>
