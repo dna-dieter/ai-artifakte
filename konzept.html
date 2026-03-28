@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Artifakte – Konzeptübersicht</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #c8d6e5; min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .back-link { display: inline-block; color: #4299e1; text-decoration: none; font-size: 0.85rem; margin-bottom: 20px; }
+        .back-link:hover { color: #63b3ed; }
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .header .subtitle { font-size: 1.1rem; color: #6b7c93; }
+        .header .meta { margin-top: 16px; display: flex; justify-content: center; gap: 24px; font-size: 0.85rem; color: #4a5568; }
+        .header .meta span { display: flex; align-items: center; gap: 6px; }
+        .header .meta .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot.active { background: #48bb78; }
+        .dot.planned { background: #4a5568; }
+        .pipeline { display: flex; justify-content: center; align-items: center; gap: 0; margin-bottom: 50px; flex-wrap: wrap; }
+        .pipeline-phase { background: linear-gradient(135deg, #1a2332, #1e293b); border: 1px solid #2d3748; border-radius: 12px; padding: 16px 20px; text-align: center; min-width: 160px; position: relative; transition: all 0.3s; }
+        .pipeline-phase:hover { border-color: #4299e1; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(66, 153, 225, 0.15); }
+        .pipeline-phase.active { border-color: #48bb78; box-shadow: 0 0 20px rgba(72, 187, 120, 0.15); }
+        .pipeline-phase .phase-num { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #4299e1; margin-bottom: 6px; }
+        .pipeline-phase.active .phase-num { color: #48bb78; }
+        .pipeline-phase .phase-title { font-size: 0.95rem; color: #fff; font-weight: 600; }
+        .pipeline-arrow { color: #2d3748; font-size: 1.5rem; padding: 0 8px; flex-shrink: 0; }
+        .section { margin-bottom: 40px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .section-header .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .section-header h2 { font-size: 1.3rem; color: #fff; }
+        .section-header .badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .badge.active { background: rgba(72,187,120,0.15); color: #48bb78; }
+        .badge.planned { background: rgba(74,85,104,0.3); color: #6b7c93; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+        .card { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 24px; transition: all 0.3s; }
+        .card:hover { border-color: #2d3748; }
+        .card h3 { font-size: 1rem; color: #e2e8f0; margin-bottom: 10px; }
+        .card p { font-size: 0.85rem; color: #6b7c93; line-height: 1.6; margin-bottom: 12px; }
+        .card .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: 0.72rem; padding: 3px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.1); color: #63b3ed; border: 1px solid rgba(66, 153, 225, 0.15); }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .tech-item { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+        .tech-item .tech-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: rgba(66, 153, 225, 0.1); flex-shrink: 0; }
+        .tech-item .tech-label { font-size: 0.8rem; color: #6b7c93; }
+        .tech-item .tech-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 500; }
+        .timeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .timeline-block { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 20px; border-top: 3px solid #2d3748; }
+        .timeline-block.now { border-top-color: #48bb78; }
+        .timeline-block .time-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: #4a5568; margin-bottom: 8px; }
+        .timeline-block.now .time-label { color: #48bb78; }
+        .timeline-block h4 { font-size: 0.95rem; color: #e2e8f0; margin-bottom: 10px; }
+        .timeline-block ul { list-style: none; padding: 0; }
+        .timeline-block li { font-size: 0.82rem; color: #6b7c93; padding: 4px 0; padding-left: 16px; position: relative; }
+        .timeline-block li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; border-radius: 50%; background: #2d3748; }
+        .timeline-block.now li::before { background: #48bb78; }
+        .footer { text-align: center; margin-top: 50px; padding-top: 30px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.8rem; }
+        .phase-1 .icon { background: rgba(72,187,120,0.15); color: #48bb78; }
+        .phase-2 .icon { background: rgba(66,153,225,0.15); color: #63b3ed; }
+        .phase-3 .icon { background: rgba(159,122,234,0.15); color: #b794f4; }
+        .phase-4 .icon { background: rgba(237,137,54,0.15); color: #ed8936; }
+        .phase-5 .icon { background: rgba(237,100,166,0.15); color: #ed64a6; }
+        .phase-6 .icon { background: rgba(56,178,172,0.15); color: #38b2ac; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Zurück zum Dashboard</a>
+        <div class="header">
+            <h1>AI Artifakte</h1>
+            <p class="subtitle">Projekt Börsenhandel · Handelssystem für Aktienhandel</p>
+            <div class="meta">
+                <span><span class="dot active"></span> Phase 1 aktiv</span>
+                <span>Projektstart: 26.03.2026</span>
+                <span>GitHub: dna-dieter/ai-artifakte</span>
+            </div>
+        </div>
+        <div class="pipeline">
+            <div class="pipeline-phase active"><div class="phase-num">Phase 1</div><div class="phase-title">Daten beschaffen</div></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-phase"><div class="phase-num">Phase 2</div><div class="phase-title">Screening & Regeln</div></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-phase"><div class="phase-num">Phase 3</div><div class="phase-title">Persistenz & Selektion</div></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-phase"><div class="phase-num">Phase 4</div><div class="phase-title">Live Trading</div></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-phase"><div class="phase-num">Phase 5</div><div class="phase-title">Journal & Optimierung</div></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-phase"><div class="phase-num">Phase 6</div><div class="phase-title">Automatisierung</div></div>
+        </div>
+        <div class="section phase-1">
+            <div class="section-header"><div class="icon">📡</div><h2>Phase 1 — Datenbeschaffung</h2><span class="badge active">Aktiv</span></div>
+            <div class="cards">
+                <div class="card"><h3>SEC-Finanzdaten</h3><p>Quartals- und Jahresdaten aller US-Unternehmen: Revenue, Earnings, EPS, Market Cap, Dividende, Schuldenquote, Cashflow.</p><div class="tech-tags"><span class="tag">SEC EDGAR API</span><span class="tag">XBRL/JSON</span><span class="tag">CIK→Ticker Mapping</span></div></div>
+                <div class="card"><h3>Tagesaktuelle Kursdaten</h3><p>OHLCV-Daten für alle relevanten Aktien. Primärquelle + Fallback, mit Split- und Dividenden-Adjustierung.</p><div class="tech-tags"><span class="tag">yfinance</span><span class="tag">IB API</span><span class="tag">S&amp;P 500+</span></div></div>
+                <div class="card"><h3>Datenspeicherung</h3><p>Zentrale Datenbank für alle Projekt-Daten. Schema für Entities, Preise, Screening-Ergebnisse und Trades.</p><div class="tech-tags"><span class="tag">SQLite → PostgreSQL</span><span class="tag">Cron/Scheduler</span><span class="tag">Backup</span></div></div>
+            </div>
+        </div>
+        <div class="section phase-2">
+            <div class="section-header"><div class="icon">🔍</div><h2>Phase 2 — Screening & Regelwerk</h2><span class="badge planned">Geplant</span></div>
+            <div class="cards">
+                <div class="card"><h3>Strategie formalisieren</h3><p>Trading-Regeln aus verschiedenen Lernquellen in maschinenlesbare Kriterien übersetzen: Fundamental, Technisch, Liquidität. Score-Modell (0–11 Punkte).</p><div class="tech-tags"><span class="tag">Regelwerk-Dokument</span><span class="tag">Gewichtung</span></div></div>
+                <div class="card"><h3>Scanner-Engine</h3><p>Python-Programm prüft täglich alle Aktien: Revenue-Wachstum, MA-Crosses, RSI, Volumen. Ergebnis: Ticker + Score + Breakdown.</p><div class="tech-tags"><span class="tag">Python Scanner</span><span class="tag">YAML Config</span><span class="tag">Strategie-Profile</span></div></div>
+            </div>
+        </div>
+        <div class="section phase-3">
+            <div class="section-header"><div class="icon">🗺️</div><h2>Phase 3 — Persistenz & Selektion</h2><span class="badge planned">Geplant</span></div>
+            <div class="cards">
+                <div class="card"><h3>Persistenzmatrix / Heatmap</h3><p>Screening-Ergebnisse über 20 Handelstage aggregieren. Dynamische Heatmap aus DB statt statischem HTML.</p><div class="tech-tags"><span class="tag">Persistenz-Score</span><span class="tag">Trend-Erkennung</span><span class="tag">heatmap.html</span></div></div>
+                <div class="card"><h3>Watchlist & Marktüberblick</h3><p>Top 100–400 Aktien als handelbare Watchlist. Marktbreite, Sektor-Rotation, VIX, Earnings-Kalender.</p><div class="tech-tags"><span class="tag">TWS Export</span><span class="tag">Alerts</span><span class="tag">watchlist.html</span></div></div>
+            </div>
+        </div>
+        <div class="section phase-4">
+            <div class="section-header"><div class="icon">⚡</div><h2>Phase 4 — Live Trading</h2><span class="badge planned">Geplant</span></div>
+            <div class="cards">
+                <div class="card"><h3>TWS/IB-Anbindung</h3><p>Verbindung zur Interactive Brokers Trader Workstation. Watchlist-Import, Echtzeit-Kurse, Kontoinformationen.</p><div class="tech-tags"><span class="tag">ib_insync</span><span class="tag">Paper Trading</span></div></div>
+                <div class="card"><h3>Pattern-Erkennung & Orders</h3><p>Breakouts, Pullbacks, MA-Crosses erkennen. Order-Management mit Position Sizing, Stop-Loss, Take-Profit.</p><div class="tech-tags"><span class="tag">Trading Signals</span><span class="tag">Risikomanagement</span><span class="tag">1–2% Regel</span></div></div>
+            </div>
+        </div>
+        <div class="section phase-5">
+            <div class="section-header"><div class="icon">📊</div><h2>Phase 5 — Journal & Optimierung</h2><span class="badge planned">Geplant</span></div>
+            <div class="cards">
+                <div class="card"><h3>Trading Journal</h3><p>Vollständige Dokumentation jedes Trades: Entry/Exit, P&L, Strategie, Emotionen, Lessons Learned.</p><div class="tech-tags"><span class="tag">journal.html</span><span class="tag">IB Auto-Import</span></div></div>
+                <div class="card"><h3>Performance Analytics & Feedback</h3><p>Win-Rate, Sharpe Ratio, Equity Curve, Max Drawdown. Monatliches Review, A/B-Testing, Backtesting neuer Regeln.</p><div class="tech-tags"><span class="tag">analytics.html</span><span class="tag">vs. S&amp;P 500</span><span class="tag">Feedback-Loop</span></div></div>
+            </div>
+        </div>
+        <div class="section phase-6">
+            <div class="section-header"><div class="icon">🤖</div><h2>Phase 6 — Automatisierung & Skalierung</h2><span class="badge planned">Zukunft</span></div>
+            <div class="cards">
+                <div class="card"><h3>Vollautomatische Pipeline</h3><p>Täglicher Cron um 06:00 MEZ: Daten aktualisieren, Screening laufen lassen, Dashboard generieren, GitHub Pages deployen.</p><div class="tech-tags"><span class="tag">Cron/Scheduler</span><span class="tag">E-Mail/Telegram</span><span class="tag">Morning Briefing</span></div></div>
+                <div class="card"><h3>Backtesting Engine</h3><p>Historische Simulation, Walk-Forward-Analyse, Parameter-Optimierung, Out-of-Sample-Testing.</p><div class="tech-tags"><span class="tag">Backtesting</span><span class="tag">Walk-Forward</span></div></div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-header"><div class="icon" style="background:rgba(56,178,172,0.15);color:#38b2ac;">🛠</div><h2>Technologie-Stack</h2></div>
+            <div class="tech-grid">
+                <div class="tech-item"><div class="tech-icon">🐍</div><div><div class="tech-name">Python 3.11+</div><div class="tech-label">Sprache</div></div></div>
+                <div class="tech-item"><div class="tech-icon">🗄</div><div><div class="tech-name">SQLite → PostgreSQL</div><div class="tech-label">Datenbank</div></div></div>
+                <div class="tech-item"><div class="tech-icon">📈</div><div><div class="tech-name">yfinance + IB API</div><div class="tech-label">Kursdaten</div></div></div>
+                <div class="tech-item"><div class="tech-icon">📋</div><div><div class="tech-name">SEC EDGAR</div><div class="tech-label">Fundamentaldaten</div></div></div>
+                <div class="tech-item"><div class="tech-icon">💹</div><div><div class="tech-name">Interactive Brokers</div><div class="tech-label">Broker (TWS)</div></div></div>
+                <div class="tech-item"><div class="tech-icon">🌐</div><div><div class="tech-name">HTML/JS · GitHub Pages</div><div class="tech-label">Frontend</div></div></div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-header"><div class="icon" style="background:rgba(237,137,54,0.15);color:#ed8936;">📅</div><h2>Zeitplan</h2></div>
+            <div class="timeline">
+                <div class="timeline-block now"><div class="time-label">Woche 1–2 · Jetzt</div><h4>Foundation</h4><ul><li>Datenbank-Schema & SQLite</li><li>SEC-Daten-Pipeline</li><li>Kursdaten-Pipeline</li><li>Regelwerk dokumentieren</li></ul></div>
+                <div class="timeline-block"><div class="time-label">Woche 3–4</div><h4>Screening & Watchlist</h4><ul><li>Scanner-Engine bauen</li><li>Persistenzmatrix dynamisch</li><li>Watchlist automatisieren</li><li>Börsentagebuch Interface</li></ul></div>
+                <div class="timeline-block"><div class="time-label">Woche 5–8</div><h4>Trading & Analytics</h4><ul><li>TWS/IB Paper Trading</li><li>Pattern-Alerts</li><li>Performance Dashboard</li><li>Risikomanagement</li></ul></div>
+                <div class="timeline-block"><div class="time-label">Monat 3+</div><h4>Skalierung</h4><ul><li>Vollautomatische Pipeline</li><li>E-Mail/Telegram Alerts</li><li>Backtesting Engine</li><li>Feedback-Loop</li></ul></div>
+            </div>
+        </div>
+        <div class="footer">AI Artifakte · Projekt Börsenhandel · Erstellt 28.03.2026</div>
+    </div>
+</body>
+</html>
