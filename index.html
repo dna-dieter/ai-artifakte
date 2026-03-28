@@ -6,20 +6,15 @@
 <title>AI Artifakte – Trading Dashboard</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #0a0e17;
-    color: #c8d6e5;
-    min-height: 100vh;
-    padding: 40px 20px;
-  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #c8d6e5; min-height: 100vh; padding: 40px 20px; }
   .container { max-width: 900px; margin: 0 auto; }
   .header { text-align: center; margin-bottom: 50px; }
   .header h1 { font-size: 2.4rem; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
   .header .subtitle { font-size: 1.05rem; color: #6b7c93; }
   .header .phase { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #48bb78; background: rgba(72,187,120,0.1); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(72,187,120,0.2); }
   .header .phase .dot { width: 8px; height: 8px; background: #48bb78; border-radius: 50%; display: inline-block; }
-  .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: #4a5568; margin-bottom: 12px; margin-top: 8px; }
+  .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
   .nav-card { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: all 0.3s; display: block; }
   .nav-card:hover { border-color: #4299e1; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(66, 153, 225, 0.15); }
   .nav-card .icon { font-size: 1.4rem; margin-bottom: 10px; }
@@ -41,6 +36,8 @@
     <p class="subtitle">Handelssystem für Aktienhandel</p>
     <div class="phase"><span class="dot"></span> Phase 1 – Datenbeschaffung</div>
   </div>
+
+  <div class="section-label">Dashboard</div>
   <div class="nav-grid">
     <a href="konzept.html" class="nav-card">
       <div class="icon">🗺️</div>
@@ -79,6 +76,17 @@
       <span class="badge planned">Geplant</span>
     </a>
   </div>
+
+  <div class="section-label">Regelwerk</div>
+  <div class="nav-grid">
+    <a href="regelwerk-earnings-growth.html" class="nav-card">
+      <div class="icon">📈</div>
+      <h3>Earnings Growth</h3>
+      <p>YoY-Vergleich des Net Income aus SEC-Filings. Formel, 10-K Regel, Sonderfälle.</p>
+      <span class="badge live">v1.0</span>
+    </a>
+  </div>
+
   <div class="footer">
     AI Artifakte · Projektstart 26.03.2026 · <a href="https://github.com/dna-dieter/ai-artifakte">GitHub</a>
   </div>

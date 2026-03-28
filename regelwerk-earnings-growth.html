@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Artifakte – Regelwerk: Earnings Growth</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #c8d6e5; min-height: 100vh; padding: 40px 20px; }
+  .container { max-width: 860px; margin: 0 auto; }
+  .back-link { display: inline-block; color: #4299e1; text-decoration: none; font-size: 0.85rem; margin-bottom: 20px; }
+  .back-link:hover { color: #63b3ed; }
+  h1 { font-size: 1.8rem; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 0.95rem; color: #6b7c93; margin-bottom: 30px; }
+  .rule-section { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .rule-section h2 { font-size: 1.05rem; color: #e2e8f0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .rule-section h2 .num { background: rgba(66,153,225,0.15); color: #63b3ed; width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  .rule-section p, .rule-section li { font-size: 0.88rem; color: #a0aec0; line-height: 1.7; }
+  .rule-section ul { padding-left: 20px; margin-top: 6px; }
+  .rule-section li { margin-bottom: 4px; }
+  .formula { background: rgba(72,187,120,0.08); border: 1px solid rgba(72,187,120,0.2); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem; color: #48bb78; }
+  .example { background: rgba(66,153,225,0.08); border: 1px solid rgba(66,153,225,0.15); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 0.85rem; color: #90cdf4; }
+  .example strong { color: #63b3ed; }
+  .warn { background: rgba(237,137,54,0.08); border: 1px solid rgba(237,137,54,0.2); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 0.85rem; color: #fbd38d; }
+  .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.78rem; }
+  .tag { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; background: rgba(66,153,225,0.1); color: #63b3ed; border: 1px solid rgba(66,153,225,0.15); margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a href="index.html" class="back-link">← Zurück zum Dashboard</a>
+  <h1>Regelwerk: Earnings Growth</h1>
+  <p class="subtitle">Screening-Kriterium · Datenquelle: SEC EDGAR · Version 1.0</p>
+
+  <div class="rule-section">
+    <h2><span class="num">1</span> Definition</h2>
+    <p><strong>Earnings Growth</strong> misst die prozentuale Veränderung des Gewinns (Net Income) einer Firma im Vergleich zum gleichen Quartal des Vorjahres (Year-over-Year, YoY).</p>
+    <div class="formula">
+      Earnings Growth = (Net Income Q<sub>aktuell</sub> − Net Income Q<sub>Vorjahr</sub>) / |Net Income Q<sub>Vorjahr</sub>| × 100%
+    </div>
+    <p>Der Absolutbetrag im Nenner stellt sicher, dass auch der Wechsel von Verlust zu Gewinn korrekt berechnet wird.</p>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">2</span> Datenquelle</h2>
+    <p>Ausschließlich offizielle SEC-Filings. Keine Aggregatoren (Yahoo Finance, Finviz etc.).</p>
+    <ul>
+      <li><strong>10-Q</strong> — Quartalsberichte (in der Regel für 3 Quartale pro Geschäftsjahr)</li>
+      <li><strong>10-K</strong> — Jahresbericht (deckt das gesamte Geschäftsjahr ab)</li>
+    </ul>
+    <div class="warn">⚠ Achtung: Die Zuordnung 10-K ≠ immer Q4. Jede Firma hat ein individuelles Fiscal Year End. Die Filing-Struktur (welche Quartale per 10-Q, welches per 10-K abgedeckt) muss pro Firma ermittelt werden.</div>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">3</span> Das fehlende Quartal (10-K Regel)</h2>
+    <p>Firmen berichten 3 Quartale per 10-Q und das Gesamtjahr per 10-K. Für das vom 10-K abgedeckte Quartal gilt:</p>
+    <div class="formula">
+      Q<sub>10-K</sub> = Jahreswert (10-K) − Summe der drei 10-Q Quartale
+    </div>
+    <div class="example">
+      <strong>Beispiel (Fiscal Year End = Dezember):</strong><br>
+      10-Q: Q1, Q2, Q3 vorhanden → Q4 = 10-K Jahreswert − (Q1 + Q2 + Q3)<br><br>
+      <strong>Beispiel (Fiscal Year End = September, z.B. Apple):</strong><br>
+      10-K deckt Q4 (Jul–Sep) ab → Q4 = 10-K − (Q1 + Q2 + Q3)
+    </div>
+    <p>Diese Berechnung wahrt die <strong>Konsistenz</strong> — das resultierende Quartalsergebnis ist rechnerisch korrekt, auch wenn es kein explizites Q4-Filing gibt.</p>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">4</span> Mindest-Historie & Stichtag</h2>
+    <ul>
+      <li><strong>Mindestens 6 Quartale</strong> an Filings nötig (≈ 1,5 Jahre), um einen vollständigen YoY-Vergleich über mehrere Quartale berechnen zu können</li>
+      <li><strong>Stichtag-Regel:</strong> Ein Quartal gilt erst als “messbar”, wenn alle relevanten Firmen ihre Berichte eingereicht haben. Firmen berichten zu unterschiedlichen Zeitpunkten — Konsistenz erfordert, dass nur abgeschlossene Berichtszyklen verglichen werden</li>
+      <li><strong>Aktuelles Quartal</strong> wird nicht gemessen (unvollständige Datenlage)</li>
+    </ul>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">5</span> Sonderfälle</h2>
+    <ul>
+      <li><strong>IPOs / Neuzugänge:</strong> Firma wird erst ins Screening aufgenommen, wenn mindestens 6 Quartale an Filings vorliegen. Vorher: Ausschluss</li>
+      <li><strong>Negative Earnings im Vorjahr:</strong> Formel mit Absolutbetrag im Nenner verwenden. Ergebnis kennzeichnen (Turnaround-Signal)</li>
+      <li><strong>Fehlende Filings:</strong> Firma wird für den betroffenen Zeitraum aus dem Screening ausgeschlossen</li>
+      <li><strong>Restatements:</strong> Immer den aktuellsten (restated) Wert verwenden</li>
+    </ul>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">6</span> Verwendete SEC-Kennzahl</h2>
+    <p>Als “Earnings” verwenden wir <strong>Net Income</strong> aus den SEC-Filings:</p>
+    <p><span class="tag">XBRL</span> <code style="color:#63b3ed;">us-gaap:NetIncomeLoss</code></p>
+    <p style="margin-top: 8px; font-size: 0.82rem; color: #6b7c93;">Hinweis: Die exakte XBRL-Taxonomie kann je nach Firma variieren. Fallback-Felder und Mapping werden in der Daten-Pipeline definiert.</p>
+  </div>
+
+  <div class="footer">
+    AI Artifakte · Regelwerk v1.0 · 28.03.2026 · Basierend auf SEC EDGAR Filings
+  </div>
+
+</div>
+</body>
+</html>
