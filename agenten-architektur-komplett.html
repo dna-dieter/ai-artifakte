@@ -27,455 +27,283 @@
   .agent.security { border-color: rgba(245,101,101,0.4); background: linear-gradient(135deg, #1a1520, #231a2a); }
 
   .agent-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .agent-id { background: rgba(66,153,225,0.15); color: #63b3ed; min-width: 30px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem; flex-shrink: 0; padding: 0 8px; }
-  .agent.exists .agent-id { background: rgba(72,187,120,0.15); color: #48bb78; }
-  .agent.security .agent-id { background: rgba(245,101,101,0.15); color: #f56565; }
-  .agent-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; }
+  .agent-icon { font-size: 1.3rem; }
+  .agent-name { color: #e2e8f0; font-weight: 600; }
+  .agent-status { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .status-live { background: rgba(72,187,120,0.2); color: #48bb78; }
+  .status-dev { background: rgba(66,153,225,0.2); color: #63b3ed; }
+  .status-planned { background: rgba(237,137,54,0.2); color: #ed8936; }
+  .status-learning { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+  .status-security { background: rgba(245,101,101,0.2); color: #fca5a5; }
 
-  .tag { font-size: 0.58rem; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
-  .tag-exists { background: rgba(72,187,120,0.12); color: #48bb78; }
-  .tag-new { background: rgba(66,153,225,0.12); color: #63b3ed; }
-  .tag-concept { background: rgba(237,137,54,0.12); color: #ed8936; }
-  .tag-security { background: rgba(245,101,101,0.12); color: #f56565; }
+  .agent-subtitle { color: #999; font-size: 0.8rem; }
+  .agent-desc { color: #a0aec0; font-size: 0.85rem; margin: 8px 0; line-height: 1.4; }
+  .agent-inputs, .agent-outputs, .agent-focus { margin: 8px 0 4px 0; font-size: 0.8rem; }
+  .agent-inputs { color: #63b3ed; }
+  .agent-outputs { color: #48bb78; }
+  .agent-focus { color: #ed8936; }
+  .badge { display: inline-block; background: rgba(100,200,255,0.15); color: #63b3ed; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-right: 4px; margin-top: 4px; }
+  .badge.new { background: rgba(72,187,120,0.15); color: #48bb78; }
+  .badge.sec { background: rgba(245,101,101,0.2); color: #fca5a5; }
 
-  .agent-desc { font-size: 0.8rem; color: #a0aec0; line-height: 1.65; }
-  .agent-desc strong { color: #c8d6e5; }
-  .agent-io { font-size: 0.75rem; color: #6b7c93; line-height: 1.55; margin-top: 6px; }
-  .agent-io strong { color: #a0aec0; }
-  .code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(66,153,225,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.72rem; color: #63b3ed; }
+  /* Layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
-  /* Flow-Pfeile */
-  .flow { display: flex; align-items: center; justify-content: center; padding: 3px 0; gap: 8px; }
-  .flow-arrow { color: #4299e1; font-size: 1rem; }
-  .flow-label { color: #4a5568; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; }
-  .flow.security-flow .flow-arrow { color: #f56565; }
-  .flow.security-flow .flow-label { color: #f56565; }
+  .flow-box { border: 1px dashed #1e293b; padding: 16px; border-radius: 8px; background: rgba(0,0,0,0.2); margin: 16px 0; }
+  .flow-header { color: #63b3ed; font-weight: 600; margin-bottom: 10px; }
+  .flow-line { color: #6b7c93; font-size: 0.85rem; margin: 4px 0; }
 
-  /* Feedback-Loop */
-  .feedback { margin-top: 14px; background: rgba(237,137,54,0.06); border: 1px dashed rgba(237,137,54,0.2); border-radius: 10px; padding: 14px 18px; }
-  .feedback h3 { color: #ed8936; font-size: 0.82rem; margin-bottom: 6px; }
-  .feedback p { font-size: 0.78rem; color: #a0aec0; line-height: 1.6; }
+  /* Livecall Kreislauf */
+  .cycle { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; padding: 16px; margin: 16px 0; }
+  .cycle-title { color: #d8b4fe; font-weight: 600; margin-bottom: 10px; }
+  .cycle-content { font-size: 0.85rem; line-height: 1.6; }
 
-  /* Security-Box */
-  .security-box { margin-top: 14px; background: rgba(245,101,101,0.05); border: 2px solid rgba(245,101,101,0.2); border-radius: 10px; padding: 16px 20px; }
-  .security-box h3 { color: #f56565; font-size: 0.85rem; margin-bottom: 8px; }
-  .security-box .rule { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; }
-  .security-box .rule-icon { flex-shrink: 0; }
-  .security-box .rule-text { color: #a0aec0; line-height: 1.5; }
-  .security-box .rule-text strong { color: #f56565; }
-
-  /* Zusammenfassung */
-  .summary { margin-top: 24px; background: rgba(66,153,225,0.06); border: 1px solid rgba(66,153,225,0.15); border-radius: 12px; padding: 20px 24px; }
-  .summary h3 { color: #63b3ed; font-size: 0.92rem; margin-bottom: 12px; }
-  .summary table { width: 100%; border-collapse: collapse; }
-  .summary th, .summary td { padding: 7px 10px; text-align: left; font-size: 0.76rem; border-bottom: 1px solid #1e293b; }
-  .summary th { color: #e2e8f0; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  .footer { text-align: center; margin-top: 30px; padding-top: 18px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.72rem; }
-
-  /* Zwei-Spalten für parallele Agents */
-  .dual { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 700px) { .dual { grid-template-columns: 1fr; } }
+  .footer { color: #6b7c93; font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid #1e293b; }
 </style>
 </head>
 <body>
 <div class="container">
+  <h1>AI Artifakte – Komplette Agentenarchitektur</h1>
+  <p class="sub">Daten → Screening → Trading → Tagebuch | Livecall-Kreislauf + 8 Agenten</p>
 
-  <h1>Komplette Agentenarchitektur</h1>
-  <p class="sub">Von SEC-Daten über Screening und Trading bis zum Tagebuch &middot; 7 Agenten &middot; Fort-Knox-Sicherheitskonzept &middot; Stand 28.03.2026</p>
-
-  <!-- ════════════════════════════════════════════ -->
+  <!-- PHASE 1: DATENBESCHAFFUNG -->
   <div class="phase active">
-    <span class="phase-num">PHASE 1</span>
-    <span class="phase-name">Datenbeschaffung</span>
+    <div class="phase-num">PHASE 1</div>
+    <div class="phase-name">Datenbeschaffung (Aktiv)</div>
   </div>
-  <!-- ════════════════════════════════════════════ -->
 
   <div class="agent exists">
     <div class="agent-header">
-      <div class="agent-id">A</div>
-      <div class="agent-name">SEC Data Agent</div>
-      <span class="tag tag-exists">Produktiv</span>
+      <div class="agent-icon">📊</div>
+      <div class="agent-name">Agent A: SEC EDGAR Loader</div>
+      <div class="agent-status status-live">LIVE</div>
     </div>
-    <div class="agent-desc">
-      Fragt SEC EDGAR täglich ab. Lädt neue Filings (10-K, 10-Q) per XBRL API. Erkennt IPOs, repariert Lücken.
-    </div>
-    <div class="agent-io">
-      <strong>Technologie:</strong> <span class="code">update_sec_data.py</span> + launchd (Di–Sa 2:00)<br>
-      <strong>Output:</strong> <span class="code">sec_data.db</span> (8.083 Firmen, ~8M Facts, 2.1 GB)<br>
-      <strong>Status:</strong> Produktiv seit 27.03.2026
-    </div>
+    <div class="agent-subtitle">Fundamentale Daten automatisch laden</div>
+    <div class="agent-desc">Lädt 10-Q/10-K Finanzdaten direkt aus SEC EDGAR XBRL API. Quarterly Revenue, Net Income, Shares Outstanding für alle 6.700+ US-Ticker. Läuft tagtäglich automatisch.</div>
+    <div class="agent-inputs">INPUT: SEC EDGAR API (kostenlos, kein API-Key)</div>
+    <div class="agent-outputs">OUTPUT: t_fin_financials, t_sym_edt_earningsdate in SQLite</div>
+    <div class="agent-focus">FOCUS: Vollständigkeit, Fehlerbehandlung, FYE-Toleranz</div>
+    <span class="badge new">8.083 Ticker</span>
+    <span class="badge new">~8M Datenpunkte</span>
   </div>
 
-  <div class="flow"><span class="flow-arrow">&darr;</span><span class="flow-label">SEC Filings (Revenue, Net Income, EPS, Dividende)</span><span class="flow-arrow">&darr;</span></div>
+  <div class="agent exists">
+    <div class="agent-header">
+      <div class="agent-icon">💹</div>
+      <div class="agent-name">Agent B: Price Data Fetcher</div>
+      <div class="agent-status status-live">LIVE</div>
+    </div>
+    <div class="agent-subtitle">Tagesaktuelle Kurse und technische Indikatoren</div>
+    <div class="agent-desc">Lädt tägliche Schlusskurse, Volumen, und berechnet EMAs (6, 10, 21). Basiert auf Yahoo Finance via yfinance. Speichert in daily_screen Tabelle.</div>
+    <div class="agent-inputs">INPUT: yfinance API (kostenlos)</div>
+    <div class="agent-outputs">OUTPUT: daily_screen (Ticker, Datum, Close, Volume, EMA6/10/21)</div>
+    <div class="agent-focus">FOCUS: Zuverlässigkeit, Echtzeit-Updates vor US-Börsenschluss</div>
+    <span class="badge new">6.700+ Ticker täglich</span>
+  </div>
 
-  <!-- ════════════════════════════════════════════ -->
+  <!-- PHASE 2: SCREENING & RANKING -->
+  <div class="phase active">
+    <div class="phase-num">PHASE 2</div>
+    <div class="phase-name">Screening & Ranking (Aktiv)</div>
+  </div>
+
+  <div class="agent exists">
+    <div class="agent-header">
+      <div class="agent-icon">🔍</div>
+      <div class="agent-name">Agent C: Daily Screener</div>
+      <div class="agent-status status-live">LIVE</div>
+    </div>
+    <div class="agent-subtitle">Morgen-Ranking nach Ollis Kriterien</div>
+    <div class="agent-desc">Läuft täglich 06:00 MEZ. Appliziert 11 Feiertag-Kriterien auf alle 6.700 Ticker:
+      <br>• Price & Volume (Ollis $20/500K/10M Regel)
+      <br>• EMA-Cross (EMA6/10/21 Alignment)
+      <br>• Fundamentals (Revenue Growth, Margin, PE)
+      <br>• Earnings Impact (Zuletzt berichtet?)
+      <br>Score 8-11 → Top-Liste.</div>
+    <div class="agent-inputs">INPUT: daily_screen + v_fin_perf_001 (Fundamentals View)</div>
+    <div class="agent-outputs">OUTPUT: CSV Top-50, DB-Import, Telegram-Summary</div>
+    <div class="agent-focus">FOCUS: Konsistenz mit Ollis Methodik, 2-von-3 Liquiditäts-Regel</div>
+    <span class="badge new">50-100 Kandidaten/Tag</span>
+  </div>
+
+  <div class="agent exists">
+    <div class="agent-header">
+      <div class="agent-icon">⚡</div>
+      <div class="agent-name">Agent D: Live Scanner</div>
+      <div class="agent-status status-dev">DEV</div>
+    </div>
+    <div class="agent-subtitle">Intraday-Setups während US-Handelstag</div>
+    <div class="agent-desc">Aktualisiert Kurse alle 5-10 Sekunden via IB API. Erkennt Live-Setups: EMA-Cross, Volume-Spike, Retest von Support. Sendet Telegram-Alerts bei Signalen.</div>
+    <div class="agent-inputs">INPUT: IB API Streaming (Real-Time Preise + Volume)</div>
+    <div class="agent-outputs">OUTPUT: Live-Watchlist, Telegram-Alerts, Kandidaten für Manual Trade</div>
+    <div class="agent-focus">FOCUS: Latenz, Pacing (max 10 req/s), Paper-Only bei Development</div>
+    <span class="badge new">Streaming-Updates</span>
+  </div>
+
+  <!-- PHASE 3: EXECUTION & TRADING -->
   <div class="phase future">
-    <span class="phase-num">PHASE 2</span>
-    <span class="phase-name">Screening &amp; Analyse</span>
-  </div>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="dual">
-    <div class="agent new">
-      <div class="agent-header">
-        <div class="agent-id">B</div>
-        <div class="agent-name">Screening Engine</div>
-        <span class="tag tag-new">Neu zu bauen</span>
-      </div>
-      <div class="agent-desc">
-        Score /11 pro Aktie. 6-stufige Filter-Kaskade (Liquidität → Phase 2). Revenue &amp; Earnings Growth aus SEC-Daten. 10-K-Regel für Q4.<br>
-        <strong>2/3+1/3 Gewichtung</strong> über 2 Quartale.
-      </div>
-      <div class="agent-io">
-        <strong>Input:</strong> sec_data.db + Kursdaten (yfinance/IB)<br>
-        <strong>Output:</strong> Screening-Score, Rangliste, Watchlist<br>
-        <strong>Frequenz:</strong> Täglich nach SEC-Update + on-demand
-      </div>
-    </div>
-
-    <div class="agent new">
-      <div class="agent-header">
-        <div class="agent-id">C</div>
-        <div class="agent-name">Coverage Analyst</div>
-        <span class="tag tag-new">Neu zu bauen</span>
-      </div>
-      <div class="agent-desc">
-        Analysiert Datenqualität: Fehlende Quartale, XBRL-Mapping-Lücken, Late Filer, FYE-Verteilung. Schlägt Verbesserungen vor.
-      </div>
-      <div class="agent-io">
-        <strong>Input:</strong> Screening-Ergebnisse + sec_data.db<br>
-        <strong>Output:</strong> Vorschläge für XBRL-Mappings, Regelwerk-Fixes<br>
-        <strong>Beispiel:</strong> &bdquo;327 Firmen nutzen RevenueFromContract…&ldquo;
-      </div>
-    </div>
+    <div class="phase-num">PHASE 3</div>
+    <div class="phase-name">Execution & Trading (Planung)</div>
   </div>
 
-  <div class="flow"><span class="flow-arrow">&darr;</span><span class="flow-label">Screening-Ergebnisse + Watchlist</span><span class="flow-arrow">&darr;</span></div>
+  <div class="agent new">
+    <div class="agent-header">
+      <div class="agent-icon">🎯</div>
+      <div class="agent-name">Agent E: Order Executor</div>
+      <div class="agent-status status-planned">PLANNED</div>
+    </div>
+    <div class="agent-subtitle">Automatisierte Order-Ausführung mit Risiko-Check</div>
+    <div class="agent-desc">Nimmt Signale von Live Scanner, führt Risiko-Checks durch (Position Sizing, Daily Loss Limit, drawdown %), und sendet Orders an TWS. Transmit=False (Manual Approval).</div>
+    <div class="agent-inputs">INPUT: Live Scanner Signals, Account State (TWS)</div>
+    <div class="agent-outputs">OUTPUT: Pre-Trade Logs, Order IDs, Telegram Confirmation</div>
+    <div class="agent-focus">FOCUS: Sicherheit (kein Auto-Transmit), Risiko-Limits, Paper-Trading first</div>
+    <span class="badge new">Risiko-Kontrolle</span>
+    <span class="badge sec">Safety-First</span>
+  </div>
 
   <div class="agent concept">
     <div class="agent-header">
-      <div class="agent-id">D</div>
-      <div class="agent-name">Regelwerk-Wächter</div>
-      <span class="tag tag-concept">Konzept</span>
+      <div class="agent-icon">📈</div>
+      <div class="agent-name">Agent F: Position Manager</div>
+      <div class="agent-status status-planned">PLANNED</div>
     </div>
-    <div class="agent-desc">
-      Kennt das vollständige Regelwerk (11 Kriterien + Filter-Kaskade). Bewertet Vorschläge von Agent C. Prüft Konsistenz.<br>
-      <strong>Dieter hat Veto-Recht</strong> — kritische Änderungen brauchen Freigabe.
-    </div>
-    <div class="agent-io">
-      <strong>Input:</strong> Vorschläge von C + Regelwerk (GitHub Pages)<br>
-      <strong>Output:</strong> Genehmigte Änderungen → zurück an A (Daten) und B (Screening)
-    </div>
+    <div class="agent-subtitle">Live-Überwachung, Stop/Ziel-Updates, Risiko-Pausen</div>
+    <div class="agent-desc">Monitort offene Positionen, berechnet dynamische Stops basierend auf ATR, und setzt Gewinnziele. Pausiert neue Orders wenn Daily-Limit erreicht.</div>
+    <div class="agent-inputs">INPUT: Open Positions (TWS), Market Data, Daily P&L</div>
+    <div class="agent-outputs">OUTPUT: Updated Stop/Ziel, Pause-Signal, Trade Logs</div>
+    <div class="agent-focus">FOCUS: Risk-Management, Psychologische Disziplin, Compliance</div>
+    <span class="badge new">Dynamic Stops</span>
   </div>
 
-  <div class="feedback">
-    <h3>&hookleftarrow; Feedback-Loop: D &rarr; A + B</h3>
-    <p>Regelwerk-Wächter gibt genehmigte Änderungen zurück: neue XBRL-Konzepte an Agent A, angepasste Schwellenwerte an Agent B. Täglicher Kreislauf.</p>
-  </div>
-
-  <div class="flow"><span class="flow-arrow">&darr;</span><span class="flow-label">Top-Kandidaten (Score &ge; 8/11) + Live-Kurse</span><span class="flow-arrow">&darr;</span></div>
-
-  <!-- ════════════════════════════════════════════ -->
+  <!-- PHASE 4: JOURNALING & LEARNING -->
   <div class="phase future">
-    <span class="phase-num">PHASE 3</span>
-    <span class="phase-name">Trading-Vorschläge (Claude als Analyst)</span>
+    <div class="phase-num">PHASE 4</div>
+    <div class="phase-name">Journaling & Learning Loop (Planung)</div>
   </div>
-  <!-- ════════════════════════════════════════════ -->
 
   <div class="agent concept">
     <div class="agent-header">
-      <div class="agent-id">E</div>
-      <div class="agent-name">Trading Analyst (Claude + TWS/IB)</div>
-      <span class="tag tag-concept">Konzept</span>
+      <div class="agent-icon">📓</div>
+      <div class="agent-name">Agent G: Trade Journal Bot</div>
+      <div class="agent-status status-planned">PLANNED</div>
     </div>
-    <div class="agent-desc">
-      Claude verfolgt <strong>Live-Daten via TWS/IB API</strong> für die Top-Kandidaten aus dem Screening. Wendet die Handelsregeln an (Feiertag-Methodik: EMA-Bounces, Keil-Breakouts, Undercuts, Bull Snorts).<br><br>
-      <strong>WICHTIG: Claude handelt NICHT selbst.</strong> Claude postet <strong>Trading-Vorschläge</strong> in eine strukturierte Excel-Datei.
-    </div>
-    <div class="agent-io">
-      <strong>Input:</strong> Live-Kurse (TWS/IB) + Screening-Watchlist + Regelwerk<br>
-      <strong>Output:</strong> Vorschläge in <span class="code">trading_vorschlaege.xlsx</span><br>
-      <strong>Felder:</strong> Ticker, Signal-Typ, Einstieg, Stop, Ziel, Score, Zeitstempel, Begründung<br>
-      <strong>Frequenz:</strong> Intraday, während US-Handelszeiten
-    </div>
+    <div class="agent-subtitle">Automatisierte Trade-Dokumentation mit KI-Analyse</div>
+    <div class="agent-desc">Nach jedem geschlossenen Trade: Exportiert Daten (Entry, Exit, P&L, Fehler), erstellt JSON-Format, und sendet an KI-Analyse. Fragt Trader: "Was war richtig/falsch?" Speichert in Trade Journal Tabelle.</div>
+    <div class="agent-inputs">INPUT: Closed Trades (TWS), Trade Entry Notes (Telegram Form)</div>
+    <div class="agent-outputs">OUTPUT: trade_journal.db, JSON strukturierte Learnings</div>
+    <div class="agent-focus">FOCUS: Datenerfassung, Konsistenz, Automatisierung für Dieter's manuellen Input</div>
+    <span class="badge new">Selbstlernend</span>
   </div>
-
-  <div class="flow security-flow"><span class="flow-arrow">&darr;</span><span class="flow-label">Vorschläge (XLSX) — NIEMALS direkte Orders</span><span class="flow-arrow">&darr;</span></div>
-
-  <!-- ════════════════════════════════════════════ -->
-  <div class="phase future">
-    <span class="phase-num">PHASE 4</span>
-    <span class="phase-name">Fort Knox — Trading Guard (Excel)</span>
-  </div>
-  <!-- ════════════════════════════════════════════ -->
 
   <div class="agent security">
     <div class="agent-header">
-      <div class="agent-id">F</div>
-      <div class="agent-name">Trading Guard (Excel &ldquo;Fort Knox&rdquo;)</div>
-      <span class="tag tag-security">Sicherheitsschicht</span>
+      <div class="agent-icon">🧠</div>
+      <div class="agent-name">Agent H: Learning Input & Feedback Loop</div>
+      <div class="agent-status status-learning">LEARNING</div>
     </div>
-    <div class="agent-desc">
-      <strong>Harte, eindeutige, intrinsische Regeln</strong> — kein AI, kein Halluzinations-Risiko. Excel prüft jeden Vorschlag und entscheidet binär: <strong>ins Töpfchen</strong> (weiter an IB) oder <strong>ins Kröpfchen</strong> (abgelehnt).
-    </div>
+    <div class="agent-subtitle">Externe Lernquellen + Feiertag Livecall-Kreislauf</div>
+    <div class="agent-desc">Aggregiert externe Lernquellen (Feiertag Trading Academy Livecalls, Discord, Börsen-News) und speichert Insights. Nutzt diese für kontinuierliche Optimierung von Screener-Schwellenwerten und Order-Regeln. Learning-Input mit Feiertag-Kreislauf koordiniert.</div>
+    <div class="agent-inputs">INPUT: Feiertag Livecall Transkripte, Discord #livetrading, Börsen-News, Backtest-Ergebnisse</div>
+    <div class="agent-outputs">OUTPUT: Updated Config Parameters, Screening Rule Updates, Insights in Learning Journal</div>
+    <div class="agent-focus">FOCUS: Methodik-Kohärenz, Livecall-Integration, kontinuierliche Verbesserung</div>
+    <span class="badge new">Livecall-Loop</span>
+    <span class="badge new">Continuous Learning</span>
   </div>
 
-  <div class="security-box">
-    <h3>Fort-Knox-Regeln (Excel-seitig, nicht Claude)</h3>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Risiko-Limit:</strong> Max. Verlust pro Trade (z.B. €50 = <span class="code">IB_MAX_RISK_EUR</span>). Positionsgröße = Risiko / Stop-Abstand.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Tages-Limit:</strong> Max. Anzahl Trades pro Tag. Max. Gesamtexposure (% des Portfolios).</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Duplikat-Check:</strong> Kein doppelter Einstieg in gleichen Ticker am gleichen Tag.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Liquiditäts-Check:</strong> Preis ≥ $20, Volumen ≥ 500K, Dollar-Volumen ≥ $10M.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Score-Minimum:</strong> Score muss ≥ Schwelle (8/11, 7/10, 7/9) sein.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Zeitfenster:</strong> Nur während US-Handelszeiten (15:30–22:00 MEZ). Keine Pre-/After-Market-Orders.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Stop-Pflicht:</strong> Jeder Trade MUSS einen Stop-Loss haben. Kein Stop → kein Trade.</div>
-    </div>
-    <div class="rule">
-      <span class="rule-icon">🛡️</span>
-      <div class="rule-text"><strong>Plausibilitäts-Check:</strong> Einstieg innerhalb ADR% des aktuellen Kurses? Stop nicht zu eng/weit?</div>
-    </div>
-  </div>
-
-  <div class="flow security-flow"><span class="flow-arrow">&darr;</span><span class="flow-label">&ldquo;Ins Töpfchen&rdquo; — geprüfte Orders</span><span class="flow-arrow">&darr;</span></div>
-
-  <!-- ════════════════════════════════════════════ -->
-  <div class="phase future">
-    <span class="phase-num">PHASE 5</span>
-    <span class="phase-name">Order-Ausführung &amp; Live-Tracking</span>
-  </div>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="dual">
-    <div class="agent security">
-      <div class="agent-header">
-        <div class="agent-id">F→IB</div>
-        <div class="agent-name">Excel → IB API Bridge</div>
-        <span class="tag tag-security">Sicherheitsschicht</span>
-      </div>
-      <div class="agent-desc">
-        Excel postet genehmigte Orders via <strong>IB API</strong> ins Live-Konto. Keine Claude-Beteiligung bei der Ausführung.<br>
-        <strong>Paper Trading zuerst!</strong>
-      </div>
-      <div class="agent-io">
-        <strong>Technologie:</strong> Excel VBA/Python → <span class="code">ib_insync</span><br>
-        <strong>Orders:</strong> Limit-Orders mit Stop-Loss<br>
-        <strong>Tracking:</strong> Sekundentakt, Fill-Status, P&amp;L
-      </div>
-    </div>
-
-    <div class="agent concept">
-      <div class="agent-header">
-        <div class="agent-id">E&#x27A1;</div>
-        <div class="agent-name">Claude liest mit (Read-Only)</div>
-        <span class="tag tag-concept">Konzept</span>
-      </div>
-      <div class="agent-desc">
-        Claude darf <strong>Live-Daten von TWS</strong> und die <strong>Trade-Ergebnisse aus Excel</strong> lesen — aber NICHT schreiben oder ordern.<br>
-        Nutzt die Daten für Analyse, Lerneffekte und bessere Vorschläge.
-      </div>
-      <div class="agent-io">
-        <strong>Liest:</strong> IB Live-Kurse + Excel Trade-Log<br>
-        <strong>Darf:</strong> Analysieren, Muster erkennen, lernen<br>
-        <strong>Darf NICHT:</strong> Orders platzieren, Excel ändern
-      </div>
-    </div>
-  </div>
-
-  <div class="flow"><span class="flow-arrow">&darr;</span><span class="flow-label">Abgeschlossene Trades + P&amp;L</span><span class="flow-arrow">&darr;</span></div>
-
-  <!-- ════════════════════════════════════════════ -->
-  <div class="phase future">
-    <span class="phase-num">PHASE 6</span>
-    <span class="phase-name">Trading-Tagebuch &amp; Performance</span>
-  </div>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="agent concept">
-    <div class="agent-header">
-      <div class="agent-id">G</div>
-      <div class="agent-name">Trading-Tagebuch &amp; Performance-Analyst</div>
-      <span class="tag tag-concept">Konzept</span>
-    </div>
-    <div class="agent-desc">
-      Dokumentiert jeden Trade automatisch. Analysiert Performance-Muster: Welche Signale funktionieren? Welche Score-Level performen am besten? Welche Tageszeiten? Welche Sektoren?<br><br>
-      Erstellt wöchentliche und monatliche Reports mit Statistiken, Equity-Kurve und Lessons Learned.
-    </div>
-    <div class="agent-io">
-      <strong>Input:</strong> Trade-Log aus Excel + Screening-Daten + Vorschlags-Historie<br>
-      <strong>Output:</strong> Trading-Tagebuch (HTML/XLSX), Performance-Dashboard, Verbesserungsvorschläge<br>
-      <strong>Metriken:</strong> Win-Rate, Avg R/R, Expectancy, Max Drawdown, Sharpe Ratio, Hit-Rate pro Signal-Typ<br>
-      <strong>Feedback:</strong> Erkenntnisse fließen zurück an Agent E (bessere Vorschläge) und Agent D (Regelwerk-Anpassung)
-    </div>
-  </div>
-
-  <div class="feedback">
-    <h3>&hookleftarrow; Feedback-Loop: G &rarr; D + E</h3>
-    <p>
-      Trading-Tagebuch liefert Erkenntnisse zurück:<br><br>
-      &rarr; <strong>Agent D (Regelwerk):</strong> z.B. &bdquo;Score-Threshold 7/10 hat bessere Performance als 8/11 — prüfen?&ldquo;<br>
-      &rarr; <strong>Agent E (Analyst):</strong> z.B. &bdquo;EMA-Bounce-Signale in ersten 30 Min nach Opening haben 70% Win-Rate vs. 45% nachmittags&ldquo;<br>
-      &rarr; <strong>Fort Knox (F):</strong> z.B. &bdquo;Stop-Loss 2% zu eng, 85% der Trades werden ausgestoppt bevor sie laufen — auf 3.5% erhöhen?&ldquo;
-    </p>
-  </div>
-
-  <!-- ════════════════════════════════════════════ -->
-  <h2>Datenflussbild (kompakt)</h2>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="agent" style="border-color: rgba(66,153,225,0.2); padding: 20px 24px; font-family: 'Fira Code', monospace; font-size: 0.72rem; line-height: 1.8; color: #a0aec0;">
-<pre style="white-space: pre-wrap;">
- SEC EDGAR ──→ <span style="color:#48bb78;">[A] SEC Data Agent</span> ──→ sec_data.db (8M Facts)
-                                              │
- Yahoo/IB  ──→ Kursdaten (SMA, 52W, Perf)    │
-                    │                          │
-                    ▼                          ▼
-              <span style="color:#63b3ed;">[B] Screening Engine</span> ◄──── <span style="color:#63b3ed;">[C] Coverage Analyst</span>
-                    │                          │
-                    │     ◄──── <span style="color:#ed8936;">[D] Regelwerk-Wächter</span> ──── Dieter (Veto)
-                    │                ▲                ▲
-                    ▼                │                │
-   TWS/IB ──→ <span style="color:#ed8936;">[E] Trading Analyst</span> (Claude)         │
-   Live        │                                     │
-               ▼                                     │
-        trading_vorschlaege.xlsx                      │
-               │                                     │
-               ▼                                     │
-        <span style="color:#f56565;">[F] Fort Knox (Excel)</span>                        │
-        🛡️ Harte Regeln, kein AI                     │
-        🛡️ Risiko-Limits, Stop-Pflicht               │
-        🛡️ Ins Töpfchen / Ins Kröpfchen              │
-               │                                     │
-               ▼                                     │
-        IB API → Live-Konto                          │
-        (Excel traces im Sekundentakt)               │
-               │                                     │
-     ◄─── [E] Claude liest mit (Read-Only) ───►     │
-               │                                     │
-               ▼                                     │
-        <span style="color:#63b3ed;">[G] Trading-Tagebuch</span> ─────────────────────────┘
-        📊 Performance, Win-Rate, Equity-Kurve
-        📝 Wöchentliche + monatliche Reports
-</pre>
-  </div>
-
-  <!-- ════════════════════════════════════════════ -->
-  <h2>Sicherheitskonzept: Warum Excel als &bdquo;Fort Knox&ldquo;</h2>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="agent" style="border-color: rgba(245,101,101,0.2);">
-    <div class="agent-desc">
-      <strong>Problem:</strong> Claude (und jedes LLM) kann halluzinieren — falsche Preise, falsche Signale, falsche Berechnungen. Bei echtem Geld ist das inakzeptabel.<br><br>
-      <strong>Lösung: Strikte Trennung von Intelligenz und Ausführung.</strong><br><br>
-      <table style="width:100%; border-collapse: collapse; font-size: 0.78rem;">
-        <tr style="border-bottom: 1px solid #1e293b;">
-          <td style="padding: 6px 10px; color: #63b3ed;"><strong>Claude (Agent E)</strong></td>
-          <td style="padding: 6px 10px;">Intelligenz, Mustererkennung, Regelwerk-Anwendung</td>
-          <td style="padding: 6px 10px; color: #ed8936;">Kann halluzinieren</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #1e293b;">
-          <td style="padding: 6px 10px; color: #f56565;"><strong>Excel (Agent F)</strong></td>
-          <td style="padding: 6px 10px;">Deterministische Regeln, mathematische Prüfungen</td>
-          <td style="padding: 6px 10px; color: #48bb78;">Kann NICHT halluzinieren</td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 10px; color: #48bb78;"><strong>IB API</strong></td>
-          <td style="padding: 6px 10px;">Reine Ausführung — nur was Excel freigibt</td>
-          <td style="padding: 6px 10px; color: #48bb78;">Deterministisch</td>
-        </tr>
-      </table>
+  <!-- FEIERTAG LIVECALL KREISLAUF -->
+  <div class="cycle">
+    <div class="cycle-title">Feiertag Livecall-Kreislauf (Agent H Kernel)</div>
+    <div class="cycle-content">
+      <strong>Zyklus alle 1-2 Wochen:</strong><br>
+      1. <strong>Call partizipieren</strong> → Ollis aktuelle Setup-Kriterien, Risiko-Lessons, Q&As in Discord<br>
+      2. <strong>Transcript + Insights erfassen</strong> → Agent H speichert in Learning DB<br>
+      3. <strong>Parameter updaten</strong> → Screener-Thresholds, EMA-Toleranzen, Earnings-Impact-Gewichte neu kalibrieren<br>
+      4. <strong>Backtest durchführen</strong> → Historische Daten 2024-2025 mit neuen Parametern checken<br>
+      5. <strong>Live-Test 1-2 Tage</strong> → Paper Trading oder Small Positions, Metriken tracken<br>
+      6. <strong>Review + Journaling</strong> → Was hat funktioniert? Insights in Trade Journal<br>
+      7. <strong>Iteration</strong> → Nächster Call, neuer Input, Kreislauf geht weiter<br>
       <br>
-      <strong>Ergebnis:</strong> Claude darf so kreativ und intelligent sein wie möglich bei der Signalsuche — aber kein einziger Euro fließt ohne Excel-Prüfung. Halluzination wird zu einem akzeptablen &bdquo;schlechten Vorschlag&ldquo; statt einem teuren Fehltrade.
+      <strong>Agent H Verantwortung:</strong> Transkripte parsen, Keywords extrahieren, Parameter-Änderungen vorschlagen, Backtests triggern.
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════ -->
-  <h2>Umsetzungsübersicht</h2>
-  <!-- ════════════════════════════════════════════ -->
-
-  <div class="summary">
-    <table>
-      <tr>
-        <th>Agent</th>
-        <th>Phase</th>
-        <th>Status</th>
-        <th>Technologie</th>
-        <th>Nächster Schritt</th>
-      </tr>
-      <tr>
-        <td><strong>A — SEC Data</strong></td>
-        <td>1</td>
-        <td style="color:#48bb78;">Produktiv</td>
-        <td>Python + launchd + SQLite</td>
-        <td>Feedback-Schnittstelle von D</td>
-      </tr>
-      <tr>
-        <td><strong>B — Screening</strong></td>
-        <td>2</td>
-        <td style="color:#63b3ed;">Zu bauen</td>
-        <td>Python + SQL + yfinance</td>
-        <td>Revenue &amp; Earnings Growth + 10-K-Regel</td>
-      </tr>
-      <tr>
-        <td><strong>C — Coverage</strong></td>
-        <td>2</td>
-        <td style="color:#63b3ed;">Zu bauen</td>
-        <td>Python + CoWork Task</td>
-        <td>XBRL-Mapping-Report</td>
-      </tr>
-      <tr>
-        <td><strong>D — Regelwerk</strong></td>
-        <td>2</td>
-        <td style="color:#ed8936;">Konzept</td>
-        <td>CoWork Agent + Dieter-Veto</td>
-        <td>Regelwerk vollständig definieren</td>
-      </tr>
-      <tr>
-        <td><strong>E — Trading Analyst</strong></td>
-        <td>3</td>
-        <td style="color:#ed8936;">Konzept</td>
-        <td>Claude + TWS/IB API (Read)</td>
-        <td>TWS-Anbindung + Signal-Logik</td>
-      </tr>
-      <tr>
-        <td><strong>F — Fort Knox</strong></td>
-        <td>4</td>
-        <td style="color:#ed8936;">Konzept</td>
-        <td>Excel + VBA/Python + IB API</td>
-        <td>Regel-Matrix definieren</td>
-      </tr>
-      <tr>
-        <td><strong>G — Tagebuch</strong></td>
-        <td>6</td>
-        <td style="color:#ed8936;">Konzept</td>
-        <td>Python + HTML Dashboard</td>
-        <td>Trade-Log-Schema definieren</td>
-      </tr>
-    </table>
+  <!-- DATENFLUSS ÜBERSICHT -->
+  <h2>Datenflussübersicht</h2>
+  <div class="flow-box">
+    <div class="flow-header">Phase 1: Datenbeschaffung</div>
+    <div class="flow-line"><strong>Agent A</strong> → SEC EDGAR API → 10-Q/10-K Parser → t_fin_financials (8M facts)</div>
+    <div class="flow-line"><strong>Agent B</strong> → Yahoo Finance (yfinance) → daily_screen (Close, Vol, EMA)</div>
   </div>
 
-  <div class="footer">AI Artifakte &middot; Komplette Agentenarchitektur v2.0 &middot; 28.03.2026</div>
+  <div class="flow-box">
+    <div class="flow-header">Phase 2: Screening & Ranking</div>
+    <div class="flow-line"><strong>Agent C</strong> (Daily 06:00) → Appliziert 11 Kriterien → Score 0-11 → CSV Top-50</div>
+    <div class="flow-line"><strong>Agent D</strong> (Intraday) → IB Streaming → Erkennt EMA-Cross, Vol-Spike → Telegram Alerts</div>
+  </div>
 
+  <div class="flow-box">
+    <div class="flow-header">Phase 3: Order Execution</div>
+    <div class="flow-line"><strong>Agent E</strong> (Future) → Live Signal + Risk Check → TWS Pre-Trade (transmit=False)</div>
+    <div class="flow-line"><strong>Agent F</strong> (Future) → Open Position + ATR → Dynamic Stops/Targets</div>
+  </div>
+
+  <div class="flow-box">
+    <div class="flow-header">Phase 4: Learning Loop</div>
+    <div class="flow-line"><strong>Agent G</strong> → Closed Trade Data → trade_journal.db + JSON</div>
+    <div class="flow-line"><strong>Agent H</strong> → Livecall Transcripts + Trade Journal → Config Updates → Back to Phase 2</div>
+  </div>
+
+  <!-- 8 AGENTEN ÜBERSICHT -->
+  <h2>Alle 8 Agenten im Überblick</h2>
+  <div class="two-col">
+    <div style="border-left: 3px solid #63b3ed; padding-left: 16px;">
+      <strong style="color: #63b3ed;">Phase 1–2: Bestehend</strong>
+      <div style="margin-top: 8px; font-size: 0.9rem;">
+        • <strong>Agent A</strong>: SEC EDGAR (LIVE)<br>
+        • <strong>Agent B</strong>: Price Data (LIVE)<br>
+        • <strong>Agent C</strong>: Daily Screener (LIVE)<br>
+        • <strong>Agent D</strong>: Live Scanner (DEV)
+      </div>
+    </div>
+    <div style="border-left: 3px solid #ed8936; padding-left: 16px;">
+      <strong style="color: #ed8936;">Phase 3–4: Planung</strong>
+      <div style="margin-top: 8px; font-size: 0.9rem;">
+        • <strong>Agent E</strong>: Order Executor (PLANNED)<br>
+        • <strong>Agent F</strong>: Position Manager (PLANNED)<br>
+        • <strong>Agent G</strong>: Trade Journal (PLANNED)<br>
+        • <strong>Agent H</strong>: Learning Input (LEARNING)
+      </div>
+    </div>
+  </div>
+
+  <!-- TECHNOLOGIE KERN -->
+  <h2>Technologie & Konfiguration</h2>
+  <div class="flow-box">
+    <div class="flow-header">Stack</div>
+    <div class="flow-line"><strong>Database:</strong> SQLite (feiertag_trading.db, 2.1GB, WAL-Modus)</div>
+    <div class="flow-line"><strong>Language:</strong> Python 3.11+ (nicht 3.14 wegen asyncio)</div>
+    <div class="flow-line"><strong>APIs:</strong> SEC EDGAR (kostenlos), yfinance, Interactive Brokers TWS (IB API)</div>
+    <div class="flow-line"><strong>Broker:</strong> Interactive Brokers (Account U7793506)</div>
+    <div class="flow-line"><strong>Notifications:</strong> Telegram (@DNAcc_bot)</div>
+    <div class="flow-line"><strong>Config:</strong> feiertag_config.py (zentrale Schwellenwerte)</div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <h2>Nächste Schritte</h2>
+  <ul style="margin-left: 20px; line-height: 1.8; color: #a0aec0; font-size: 0.9rem;">
+    <li><strong>Agent D (Live Scanner):</strong> Finalisierung und Paper-Trading Test</li>
+    <li><strong>Agent E (Order Executor):</strong> Risk-Check Logik, TWS Integration, transmit=False Default</li>
+    <li><strong>Agent H (Learning Loop):</strong> Feiertag Livecall Parser, Auto-Parameter Updates</li>
+    <li><strong>Trade Journal (Agent G):</strong> DB-Schema + Telegram Form für Entry-Notes</li>
+    <li><strong>Backtesting Framework:</strong> Für Parameter-Validation nach Livecall-Input</li>
+  </ul>
+
+  <div class="footer">
+    <strong>Letzte Aktualisierung:</strong> 28.03.2026<br>
+    <strong>Version:</strong> Architektur v2.1 (Agent H + Livecall-Kreislauf + 8 Agenten-Übersicht)<br>
+    <strong>Quelle:</strong> AI Artifakte – Börsenhandel Projekt
+  </div>
 </div>
 </body>
 </html>
