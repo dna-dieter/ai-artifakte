@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Artifakte – Regelwerk: Screening Score</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e17; color: #c8d6e5; min-height: 100vh; padding: 40px 20px; }
+  .container { max-width: 860px; margin: 0 auto; }
+  .back-link { display: inline-block; color: #4299e1; text-decoration: none; font-size: 0.85rem; margin-bottom: 20px; }
+  .back-link:hover { color: #63b3ed; }
+  h1 { font-size: 1.8rem; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 0.95rem; color: #6b7c93; margin-bottom: 30px; }
+  .rule-section { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .rule-section h2 { font-size: 1.05rem; color: #e2e8f0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .rule-section h2 .num { background: rgba(66,153,225,0.15); color: #63b3ed; width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  .rule-section p, .rule-section li { font-size: 0.88rem; color: #a0aec0; line-height: 1.7; }
+  .rule-section ul { padding-left: 20px; margin-top: 6px; }
+  .rule-section li { margin-bottom: 4px; }
+  .formula { background: rgba(72,187,120,0.08); border: 1px solid rgba(72,187,120,0.2); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem; color: #48bb78; }
+  .example { background: rgba(66,153,225,0.08); border: 1px solid rgba(66,153,225,0.15); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 0.85rem; color: #90cdf4; }
+  .example strong { color: #63b3ed; }
+  .warn { background: rgba(237,137,54,0.08); border: 1px solid rgba(237,137,54,0.2); border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 0.85rem; color: #fbd38d; }
+  .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.78rem; }
+  .tag { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; background: rgba(66,153,225,0.1); color: #63b3ed; border: 1px solid rgba(66,153,225,0.15); margin-right: 4px; }
+  .tag.active { background: rgba(72,187,120,0.1); color: #48bb78; border-color: rgba(72,187,120,0.15); }
+  .tag.tbd { background: rgba(74,85,104,0.2); color: #6b7c93; border-color: rgba(74,85,104,0.3); }
+  .score-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .score-table th, .score-table td { padding: 10px 14px; text-align: left; font-size: 0.85rem; border-bottom: 1px solid #1e293b; }
+  .score-table th { color: #e2e8f0; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .score-table td { color: #a0aec0; }
+  .score-table tr:last-child td { border-bottom: none; }
+  .score-table .num-col { text-align: center; width: 40px; }
+  .score-table .pts-col { text-align: center; width: 70px; color: #48bb78; font-weight: 600; }
+  .criterion-detail { background: rgba(66,153,225,0.05); border: 1px solid rgba(66,153,225,0.12); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+  .criterion-detail h3 { font-size: 0.95rem; color: #e2e8f0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .criterion-detail h3 .cnum { background: rgba(72,187,120,0.15); color: #48bb78; width: 22px; height: 22px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .criterion-detail p { font-size: 0.85rem; color: #a0aec0; line-height: 1.7; }
+  .sub-formula { background: rgba(72,187,120,0.06); border: 1px solid rgba(72,187,120,0.15); border-radius: 6px; padding: 10px 14px; margin: 10px 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; color: #48bb78; }
+  .weight-bar { display: flex; gap: 0; margin: 10px 0; border-radius: 6px; overflow: hidden; height: 28px; }
+  .weight-bar .w1 { background: rgba(72,187,120,0.25); flex: 2; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #48bb78; font-weight: 600; }
+  .weight-bar .w2 { background: rgba(72,187,120,0.12); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #48bb78; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="back-link">&larr; Zur&uuml;ck zum Dashboard</a>
+  <h1>Regelwerk: Screening Score</h1>
+  <p class="subtitle">Gesamtbewertung &middot; 11 Kriterien &middot; Max. 11 Punkte &middot; Version 1.0</p>
+
+  <div class="rule-section">
+    <h2><span class="num">1</span> Grundprinzip</h2>
+    <p>Jede Aktie wird anhand von <strong>11 Kriterien</strong> bewertet. Jedes Kriterium vergibt <strong>bin&auml;r</strong> zwischen 0 und maximal 1 Punkt. Der Gesamtscore ergibt sich aus der Summe aller Kriterien.</p>
+    <div class="formula">Screening Score = &Sigma; (Kriterium 1 &hellip; 11) &rarr; Max. 11 Punkte</div>
+    <p><strong>Bin&auml;re Bewertung:</strong> Entweder ist ein Kriterium erf&uuml;llt (&rarr; Punkte gem&auml;&szlig; Gewichtung) oder nicht (&rarr; 0 Punkte). Es gibt keine Abstufung nach St&auml;rke des Signals.</p>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">2</span> Quartals-Gewichtung (2-Quartals-Regel)</h2>
+    <p>Fundamentale Kriterien wie Earnings Growth und Sales Growth werden nicht nur am letzten Quartal gemessen, sondern &uuml;ber <strong>zwei Quartale</strong> gewichtet:</p>
+    <div class="formula">Score = (Q<sub>letzt</sub> erf&uuml;llt? &times; &frac23;) + (Q<sub>vorletzt</sub> erf&uuml;llt? &times; &frac13;)</div>
+    <div class="weight-bar">
+      <div class="w1">Letztes Quartal &middot; &frac23; (0.67)</div>
+      <div class="w2">Vorletztes &middot; &frac13; (0.33)</div>
+    </div>
+    <p style="margin-top: 10px;"><strong>Warum zwei Quartale?</strong> Ein einzelnes Quartal kann Ausrei&szlig;er enthalten. Die Kombination aus zwei Quartalen gibt ein stabileres Signal &mdash; das aktuellste Quartal wird dabei st&auml;rker gewichtet.</p>
+    <div class="warn">&9888; &bdquo;Letztes abgelaufenes Quartal&ldquo; = das j&uuml;ngste Quartal, f&uuml;r das ein vollst&auml;ndiges Filing vorliegt. Das aktuelle (noch laufende) Quartal wird nicht ber&uuml;cksichtigt.</div>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">3</span> Die 11 Kriterien im &Uuml;berblick</h2>
+    <table class="score-table">
+      <thead><tr><th class="num-col">#</th><th>Kriterium</th><th>Methodik</th><th class="pts-col">Max.</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="num-col">1</td><td>Earnings Growth</td><td>YoY, 2-Quartals-Gewichtung</td><td class="pts-col">1</td><td><span class="tag active">Definiert</span></td></tr>
+        <tr><td class="num-col">2</td><td>Sales Growth</td><td>YoY, 2-Quartals-Gewichtung</td><td class="pts-col">1</td><td><span class="tag active">Definiert</span></td></tr>
+        <tr><td class="num-col">3</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">4</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">5</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">6</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">7</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">8</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">9</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">10</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+        <tr><td class="num-col">11</td><td>&mdash;</td><td>&mdash;</td><td class="pts-col">1</td><td><span class="tag tbd">Offen</span></td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 8px; font-size: 0.82rem; color: #6b7c93;">Die Kriterien 3&ndash;11 werden schrittweise erg&auml;nzt. Diese Seite wird mit jeder neuen Definition aktualisiert.</p>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">4</span> Kriterium 1: Earnings Growth</h2>
+    <div class="criterion-detail">
+      <h3><span class="cnum">1</span> Earnings Growth Score</h3>
+      <p><strong>Frage:</strong> Sind die Earnings (Net Income) im Vergleich zum gleichen Quartal des Vorjahres gewachsen?</p>
+      <p><strong>Bewertung:</strong> Bin&auml;r &mdash; Earnings YoY &gt; 0% = erf&uuml;llt, sonst nicht erf&uuml;llt.</p>
+      <div class="sub-formula">Score = (EG<sub>Q-letzt</sub> &gt; 0% &rarr; &frac23;) + (EG<sub>Q-vorletzt</sub> &gt; 0% &rarr; &frac13;)<br>Max: &frac23; + &frac13; = 1.0 Punkt</div>
+      <p><strong>Berechnung der Earnings Growth:</strong> Siehe <a href="regelwerk-earnings-growth.html" style="color: #63b3ed;">Regelwerk: Earnings Growth</a> f&uuml;r die vollst&auml;ndige Definition (YoY-Formel, 10-K-Regel, SEC-Kennzahl).</p>
+    </div>
+    <div class="example">
+      <strong>Beispiel &ndash; Firma XYZ (FY End Dezember):</strong><br><br>
+      Letztes abgelaufenes Quartal = Q3 2025:<br>
+      &rarr; Net Income Q3 2025: $120M vs. Q3 2024: $95M &rarr; YoY = +26.3% &rarr; <strong>Erf&uuml;llt &rarr; &frac23; Punkt</strong><br><br>
+      Vorletztes Quartal = Q2 2025:<br>
+      &rarr; Net Income Q2 2025: $88M vs. Q2 2024: $92M &rarr; YoY = &minus;4.3% &rarr; <strong>Nicht erf&uuml;llt &rarr; 0 Punkte</strong><br><br>
+      <strong>Earnings Growth Score = &frac23; + 0 = 0.67 Punkte</strong>
+    </div>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">5</span> Kriterium 2: Sales Growth</h2>
+    <div class="criterion-detail">
+      <h3><span class="cnum">2</span> Sales Growth Score</h3>
+      <p><strong>Frage:</strong> Ist der Umsatz (Revenue) im Vergleich zum gleichen Quartal des Vorjahres gewachsen?</p>
+      <p><strong>Bewertung:</strong> Bin&auml;r &mdash; Sales YoY &gt; 0% = erf&uuml;llt, sonst nicht erf&uuml;llt.</p>
+      <div class="sub-formula">Score = (SG<sub>Q-letzt</sub> &gt; 0% &rarr; &frac23;) + (SG<sub>Q-vorletzt</sub> &gt; 0% &rarr; &frac13;)<br>Max: &frac23; + &frac13; = 1.0 Punkt</div>
+      <p><strong>Berechnung der Sales Growth:</strong> Siehe <a href="regelwerk-sales-growth.html" style="color: #63b3ed;">Regelwerk: Sales Growth</a> f&uuml;r die vollst&auml;ndige Definition (YoY-Formel, 10-K-Regel, SEC-Kennzahl).</p>
+    </div>
+    <div class="example">
+      <strong>Beispiel &ndash; Firma XYZ (gleiche Firma wie oben):</strong><br><br>
+      Letztes abgelaufenes Quartal = Q3 2025:<br>
+      &rarr; Revenue Q3 2025: $450M vs. Q3 2024: $410M &rarr; YoY = +9.8% &rarr; <strong>Erf&uuml;llt &rarr; &frac23; Punkt</strong><br><br>
+      Vorletztes Quartal = Q2 2025:<br>
+      &rarr; Revenue Q2 2025: $430M vs. Q2 2024: $395M &rarr; YoY = +8.9% &rarr; <strong>Erf&uuml;llt &rarr; &frac13; Punkt</strong><br><br>
+      <strong>Sales Growth Score = &frac23; + &frac13; = 1.0 Punkte (Maximum)</strong>
+    </div>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">6</span> Datenvoraussetzungen &amp; Aufnahmeregeln</h2>
+    <p>Damit eine Aktie &uuml;berhaupt bewertet werden kann, m&uuml;ssen <strong>Mindestanforderungen an die Datenlage</strong> erf&uuml;llt sein:</p>
+    <ul>
+      <li><strong>Mindest-Historie: &asymp; 1&frac34; Jahre</strong> an SEC-Filings (&asymp; 7 Quartale). Begr&uuml;ndung: F&uuml;r 2 Quartale YoY-Vergleich ben&ouml;tigt man das aktuelle Quartal, das Vorquartal, und jeweils das Vergleichsquartal im Vorjahr &mdash; plus die 10-K-Regel erfordert ein vollst&auml;ndiges Gesch&auml;ftsjahr</li>
+      <li><strong>Pflichtdaten: Earnings UND Revenues</strong> &mdash; eine Firma wird nur ins Screening aufgenommen, wenn beide Kennzahlen (Net Income und Revenue) in den Filings vorhanden sind</li>
+      <li><strong>Nachz&uuml;gler-Regel:</strong> Firmen, die die Mindest-Historie noch nicht erf&uuml;llen (z.B. IPOs, Neuzug&auml;nge), werden &uuml;ber die Zeit mit Sonderregeln nachgezogen, sobald gen&uuml;gend Filings vorliegen</li>
+    </ul>
+    <div class="warn">&9888; Diese Regeln bestimmen das Aktienuniversum: Nicht alle b&ouml;rsennotierten Firmen werden sofort bewertet. Die Datenlage entscheidet &uuml;ber die Aufnahme &mdash; Vollst&auml;ndigkeit vor Breite.</div>
+  </div>
+
+  <div class="rule-section">
+    <h2><span class="num">7</span> Gesamtberechnung (Beispiel)</h2>
+    <div class="example">
+      <strong>Firma XYZ &ndash; Zwischenstand (2 von 11 Kriterien definiert):</strong><br><br>
+      Kriterium 1 &ndash; Earnings Growth: <strong>0.67</strong> / 1.0<br>
+      Kriterium 2 &ndash; Sales Growth: <strong>1.00</strong> / 1.0<br>
+      Kriterien 3&ndash;11: <em>noch nicht definiert</em><br><br>
+      <strong>Screening Score = 1.67 / 2.0 (von bisher definierten Kriterien)</strong><br>
+      <em>Finale Berechnung erst m&ouml;glich, wenn alle 11 Kriterien definiert sind.</em>
+    </div>
+  </div>
+
+  <div class="footer">AI Artifakte &middot; Regelwerk Screening Score v1.0 &middot; 28.03.2026 &middot; 2 von 11 Kriterien definiert</div>
+</div>
+</body>
+</html>
