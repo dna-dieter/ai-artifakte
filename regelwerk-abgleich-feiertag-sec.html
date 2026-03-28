@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Artifakte – Präziser Abgleich: Feiertag Regelwerk ↔ SEC Daten</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0e17; color: #c8d6e5; min-height: 100vh; padding: 30px 20px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { color: #fff; font-size: 1.5rem; margin-bottom: 4px; }
+  h2 { color: #63b3ed; font-size: 1.1rem; margin: 28px 0 12px 0; }
+  h3 { color: #e2e8f0; font-size: 0.95rem; margin: 18px 0 8px 0; }
+  .sub { color: #6b7c93; font-size: 0.85rem; margin-bottom: 24px; }
+
+  /* Kriterium-Karten */
+  .criterion { background: linear-gradient(135deg, #131a27, #1a2332); border: 1px solid #1e293b; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; position: relative; }
+  .criterion.sec-ready { border-left: 4px solid #48bb78; }
+  .criterion.external { border-left: 4px solid #ed8936; }
+  .criterion.mixed { border-left: 4px solid #63b3ed; }
+
+  .crit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .crit-id { background: rgba(66,153,225,0.15); color: #63b3ed; min-width: 36px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.75rem; flex-shrink: 0; padding: 0 6px; }
+  .crit-name { font-size: 0.95rem; color: #e2e8f0; font-weight: 600; }
+  .crit-pts { color: #a0aec0; font-size: 0.78rem; margin-left: auto; }
+
+  .tag { font-size: 0.6rem; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .tag-sec { background: rgba(72,187,120,0.12); color: #48bb78; }
+  .tag-ext { background: rgba(237,137,54,0.12); color: #ed8936; }
+  .tag-mix { background: rgba(66,153,225,0.12); color: #63b3ed; }
+
+  .mapping { display: grid; grid-template-columns: 1fr 30px 1fr; gap: 0; margin: 8px 0; }
+  .mapping-col { font-size: 0.78rem; line-height: 1.6; }
+  .mapping-arrow { display: flex; align-items: center; justify-content: center; color: #4299e1; font-size: 0.9rem; }
+  .mapping-label { color: #6b7c93; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+  .feiertag-box { background: rgba(237,137,54,0.06); border: 1px solid rgba(237,137,54,0.15); border-radius: 8px; padding: 10px 14px; }
+  .sec-box { background: rgba(72,187,120,0.06); border: 1px solid rgba(72,187,120,0.15); border-radius: 8px; padding: 10px 14px; }
+
+  .detail { font-size: 0.78rem; color: #a0aec0; line-height: 1.65; margin-top: 6px; }
+  .detail strong { color: #c8d6e5; }
+  .code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(66,153,225,0.08); padding: 1px 5px; border-radius: 3px; font-size: 0.73rem; color: #63b3ed; }
+  .warn { color: #ed8936; }
+  .ok { color: #48bb78; }
+
+  /* Zusammenfassung */
+  .summary { margin-top: 24px; background: rgba(66,153,225,0.06); border: 1px solid rgba(66,153,225,0.15); border-radius: 12px; padding: 20px 24px; }
+  .summary table { width: 100%; border-collapse: collapse; }
+  .summary th, .summary td { padding: 7px 10px; text-align: left; font-size: 0.78rem; border-bottom: 1px solid #1e293b; }
+  .summary th { color: #e2e8f0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* c-sec Vergleich */
+  .compare { margin-top: 24px; background: rgba(237,137,54,0.06); border: 1px dashed rgba(237,137,54,0.25); border-radius: 12px; padding: 18px 22px; }
+  .compare h3 { color: #ed8936; font-size: 0.9rem; margin-bottom: 10px; }
+  .compare table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .compare th, .compare td { padding: 6px 10px; text-align: left; font-size: 0.76rem; border-bottom: 1px solid rgba(237,137,54,0.1); }
+  .compare th { color: #ed8936; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .compare td { color: #a0aec0; }
+
+  .section-divider { border: none; border-top: 1px solid #1e293b; margin: 30px 0; }
+
+  .footer { text-align: center; margin-top: 30px; padding-top: 18px; border-top: 1px solid #1e293b; color: #4a5568; font-size: 0.72rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Präziser Abgleich: Feiertag Regelwerk &harr; SEC Daten</h1>
+  <p class="sub">11 Scoring-Kriterien &middot; Datenquelle je Kriterium &middot; XBRL-Mapping &middot; Lückenanalyse &middot; Stand 28.03.2026</p>
+
+  <!-- ============================================================ -->
+  <h2>11 Scoring-Kriterien: Feiertag &harr; sec_data.db</h2>
+  <!-- ============================================================ -->
+
+  <!-- K01+K02: Phase 2 -->
+  <div class="criterion external">
+    <div class="crit-header">
+      <div class="crit-id">K01+02</div>
+      <div class="crit-name">Phase 2 (Kurs &gt; SMA200 steigend + &gt; SMA50)</div>
+      <span class="tag tag-ext">Yahoo/IB</span>
+      <span class="crit-pts">2 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">above_sma200 AND above_sma50 AND golden_cross AND sma200_rising</span><br>
+          SMA200 via <span class="code">close.rolling(200).mean()</span><br>
+          SMA200 steigend: Vergleich mit Wert vor <span class="code">SMA_RISING_LOOKBACK=20</span> Tagen<br>
+          Quelle: <strong>yfinance</strong> Kursdaten (1 Jahr)
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="warn">&cross; Nicht vorhanden</span><br>
+          SEC enthält <strong>keine Kursdaten</strong>.<br>
+          Benötigt: Tägliche Schlusskurse für SMA-Berechnung.<br>
+          <strong>Quelle:</strong> yfinance oder IB API (extern)
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Fazit:</strong> Rein technisches Kriterium. Kein Bezug zu SEC-Finanzdaten. Muss aus Kursdaten-Pipeline kommen (yfinance/IB).
+    </div>
+  </div>
+
+  <!-- K03: Golden Cross -->
+  <div class="criterion external">
+    <div class="crit-header">
+      <div class="crit-id">K03</div>
+      <div class="crit-name">Golden Cross (SMA50 &gt; SMA200)</div>
+      <span class="tag tag-ext">Yahoo/IB</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">golden_cross_check(sma50, sma200)</span><br>
+          Toleranz: <span class="code">GOLDEN_CROSS_TOLERANCE=0.95</span><br>
+          &rarr; SMA50 &ge; 95% der SMA200 reicht (Soft-GC)<br>
+          Quelle: <strong>yfinance</strong>
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="warn">&cross; Nicht vorhanden</span><br>
+          Technisches Kriterium, keine SEC-Daten.
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Besonderheit:</strong> Feiertag nutzt 5%-Toleranz — Aktien knapp vor dem GC werden mitgenommen (z.B. DELL: SMA50 nur $0.98 unter SMA200).
+    </div>
+  </div>
+
+  <!-- K04: Nahe am 52W-Hoch -->
+  <div class="criterion external">
+    <div class="crit-header">
+      <div class="crit-id">K04</div>
+      <div class="crit-name">&lt; 25% unter 52-Wochen-Hoch</div>
+      <span class="tag tag-ext">Yahoo/IB</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_NEAR_HIGH_PCT = 25</span><br>
+          <span class="code">abs(dist_high) &le; 25%</span><br>
+          52W-Hoch = <span class="code">close.tail(252).max()</span>
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="warn">&cross; Nicht vorhanden</span><br>
+          Benötigt tägliche Kursdaten.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K05: Über 52W-Tief -->
+  <div class="criterion external">
+    <div class="crit-header">
+      <div class="crit-id">K05</div>
+      <div class="crit-name">&gt; 25% über 52-Wochen-Tief</div>
+      <span class="tag tag-ext">Yahoo/IB</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_ABOVE_LOW_PCT = 25</span><br>
+          <span class="code">dist_low &ge; 25%</span><br>
+          52W-Tief = <span class="code">close.tail(252).min()</span>
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="warn">&cross; Nicht vorhanden</span><br>
+          Benötigt tägliche Kursdaten.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K06+K07: Revenue Growth -->
+  <div class="criterion sec-ready">
+    <div class="crit-header">
+      <div class="crit-id">K06+07</div>
+      <div class="crit-name">Umsatzwachstum YoY (&gt;20% = 1 Pkt, &gt;50% = 2 Pkt)</div>
+      <span class="tag tag-sec">SEC-Daten</span>
+      <span class="crit-pts">1–2 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System (feiertag_trading.db)</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_REV_GROWTH_MED = 20%</span><br>
+          <span class="code">SCORE_REV_GROWTH_HIGH = 50%</span><br>
+          View: <span class="code">v_fin_perf_001.rev_wachstum</span><br>
+          Basis: <span class="code">t_fin_financials.fin_qtr_rev</span><br>
+          Qualifier: <span class="code">10q</span> (direkt) | <span class="code">c-sec</span> (berechnet) | <span class="code">nas</span> (Fallback)<br>
+          YoY = aktuelles Quartal vs. Vorjahresquartal
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="ok">&check; Vorhanden</span><br>
+          <span class="code">v_financials.revenue</span> (Pivot-View)<br>
+          XBRL: <span class="code">Revenues</span> | <span class="code">RevenueFromContractWithCustomerExcludingAssessedTax</span><br>
+          Form: <span class="code">10-Q</span> (Quartal) | <span class="code">10-K</span> (Jahres)<br>
+          Periode: <span class="code">fiscal_period</span> (Q1/Q2/Q3/FY)
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Anknüpfungspunkt:</strong> Direktes Mapping möglich. <span class="code">v_financials.revenue</span> mit <span class="code">form='10-Q'</span> liefert Quartalsumsätze. Für Q4 gilt die 10-K-Regel (s.u.).<br>
+      <strong>Abweichung:</strong> Feiertag nutzt Qualifier-System (<span class="code">10q/c-sec/nas</span>) — sec_data.db hat keine Qualifier, aber die gleiche Datenquelle (SEC XBRL).<br>
+      <strong>XBRL-Lücke:</strong> Feiertag-System nutzt auch <span class="code">RevenueFromContractWithCustomerExcludingAssessedTax</span> als Fallback. sec_data.db mappt aktuell nur auf <span class="code">Revenues</span> in v_financials.<br>
+      <strong>Handlungsbedarf:</strong> Screening-Engine muss XBRL-Fallback-Konzepte für Revenue implementieren (327+ Firmen betroffen).
+    </div>
+  </div>
+
+  <!-- K08: Earnings Growth -->
+  <div class="criterion sec-ready">
+    <div class="crit-header">
+      <div class="crit-id">K08</div>
+      <div class="crit-name">Gewinnwachstum YoY &gt; 20%</div>
+      <span class="tag tag-sec">SEC-Daten</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System (feiertag_trading.db)</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_EARN_GROWTH_MIN = 20%</span><br>
+          View: <span class="code">v_fin_perf_001.net_wachstum</span><br>
+          Basis: <span class="code">t_fin_financials.fin_qtr_net</span><br>
+          Qualifier: <span class="code">10q</span> | <span class="code">c-sec</span> | <span class="code">nas</span><br>
+          YoY = aktuelles Quartal vs. Vorjahresquartal
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="ok">&check; Vorhanden</span><br>
+          <span class="code">v_financials.net_income</span> (Pivot-View)<br>
+          XBRL: <span class="code">NetIncomeLoss</span><br>
+          Form: <span class="code">10-Q</span> | <span class="code">10-K</span><br>
+          Periode: <span class="code">fiscal_period</span> (Q1/Q2/Q3/FY)
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Anknüpfungspunkt:</strong> Direktes Mapping. <span class="code">NetIncomeLoss</span> ist das Standard-XBRL-Konzept, deckt den Großteil ab.<br>
+      <strong>Sonderfall:</strong> Bei Earnings Growth ist Vorzeichenwechsel zu beachten (Verlust → Gewinn). Feiertag löst das über v_fin_perf_001 mit <span class="code">status = 'reported'</span>.
+    </div>
+  </div>
+
+  <!-- K09: Keine Dividende -->
+  <div class="criterion mixed">
+    <div class="crit-header">
+      <div class="crit-id">K09</div>
+      <div class="crit-name">Keine Dividende (&lt; 0.5%)</div>
+      <span class="tag tag-mix">SEC + extern</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_MAX_DIVIDEND_PCT = 0.5%</span><br>
+          Aktuell: <strong>nicht in DB implementiert</strong> (TODO)<br>
+          Full-Universe: <span class="code">yf.Ticker.info['dividendYield']</span><br>
+          Daily Report: Heuristik — alle Ticker = 0 Dividende
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="ok">&check; Teilweise vorhanden</span><br>
+          <span class="code">v_financials.dividend_per_share</span><br>
+          XBRL: <span class="code">CommonStockDividendsPerShareDeclared</span><br>
+          &rarr; Gibt Dividende/Aktie, nicht Yield.<br>
+          Für Yield: <span class="code">dividend_per_share / Kurs</span> nötig.
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Anknüpfungspunkt:</strong> sec_data.db liefert <span class="code">dividend_per_share</span> aus 10-K. Zusammen mit einem Kursdatum ergibt das die Dividend Yield. Alternativ: Binärcheck — wenn <span class="code">dividend_per_share = 0</span>, dann keine Dividende → 1 Punkt.<br>
+      <strong>Feiertag-Lücke:</strong> Dividenden-Daten fehlen im Daily Report komplett (aktuell immer 1 Punkt für alle). SEC-Daten können das beheben.
+    </div>
+  </div>
+
+  <!-- K10: Tech Sektor -->
+  <div class="criterion mixed">
+    <div class="crit-header">
+      <div class="crit-id">K10</div>
+      <div class="crit-name">Tech/Scalable Sektor</div>
+      <span class="tag tag-mix">SEC + extern</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_TECH_SECTORS = ['Technology', 'Communication Services', 'Financial Services']</span><br>
+          Basis: <span class="code">t_std_stammdaten.std_sector</span><br>
+          Quelle: <strong>Yahoo Finance</strong> Sektorzuordnung (GICS)
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="ok">&check; Teilweise vorhanden</span><br>
+          <span class="code">companies.sic</span> (SIC-Code, 4-stellig)<br>
+          <span class="code">companies.sic_desc</span> (Branchenbeschreibung)<br>
+          &rarr; SIC ≠ GICS. Mapping nötig:<br>
+          SIC 3570-3579, 3670-3679, 7370-7379 ≈ Technology
+        </div>
+      </div>
+    </div>
+    <div class="detail">
+      <strong>Problem:</strong> SEC verwendet SIC (Standard Industrial Classification), Feiertag/Yahoo verwendet GICS (Global Industry Classification). Kein 1:1-Mapping.<br>
+      <strong>Lösung:</strong> SIC→GICS Mapping-Tabelle erstellen, oder weiterhin Yahoo-Sektordaten verwenden. SEC-SIC allein reicht nicht für exakte Zuordnung.
+    </div>
+  </div>
+
+  <!-- K11: 3M-Performance -->
+  <div class="criterion external">
+    <div class="crit-header">
+      <div class="crit-id">K11</div>
+      <div class="crit-name">3-Monats-Performance &gt; 0%</div>
+      <span class="tag tag-ext">Yahoo/IB</span>
+      <span class="crit-pts">1 Pkt</span>
+    </div>
+    <div class="mapping">
+      <div class="mapping-col">
+        <div class="mapping-label">Feiertag-System</div>
+        <div class="feiertag-box">
+          <span class="code">SCORE_MIN_PERF_3M = 0%</span><br>
+          <span class="code">perf_3m = (kurs - kurs_vor_63_tagen) / kurs_vor_63_tagen * 100</span>
+        </div>
+      </div>
+      <div class="mapping-arrow">&harr;</div>
+      <div class="mapping-col">
+        <div class="mapping-label">sec_data.db</div>
+        <div class="sec-box">
+          <span class="warn">&cross; Nicht vorhanden</span><br>
+          Benötigt tägliche Kursdaten.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <hr class="section-divider">
+  <h2>c-sec Regel: Vergleich beider Systeme</h2>
+  <!-- ============================================================ -->
+
+  <div class="compare">
+    <h3>10-K-Regel (Q4-Berechnung bei fehlendem 10-Q)</h3>
+    <p style="font-size:0.82rem; color:#a0aec0; margin-bottom:12px;">
+      Beide Systeme lösen das gleiche Problem: Viele Firmen veröffentlichen kein separates 10-Q für Q4, weil der 10-K-Jahresbericht die Jahresdaten enthält.<br>
+      <strong>Q4 = 10-K (Jahres) &minus; (Q1 + Q2 + Q3)</strong>
+    </p>
+    <table>
+      <tr>
+        <th style="width:25%;">Aspekt</th>
+        <th style="width:37%;">Feiertag (feiertag_trading.db)</th>
+        <th style="width:38%;">AI Artifakte (sec_data.db)</th>
+      </tr>
+      <tr>
+        <td><strong>Formel</strong></td>
+        <td><span class="code">c-sec = 10K_ann - (Q1+Q2+Q3)</span></td>
+        <td>Identische Logik nötig in Screening-Engine</td>
+      </tr>
+      <tr>
+        <td><strong>Qualifier</strong></td>
+        <td><span class="code">c-sec</span> (berechnet), <span class="code">10q</span> (direkt), <span class="code">nas</span> (NASDAQ-Fallback)</td>
+        <td>Kein Qualifier-System. <span class="code">fiscal_period=FY</span> + <span class="code">form=10-K</span> identifiziert Jahresberichte</td>
+      </tr>
+      <tr>
+        <td><strong>Q4-Erkennung</strong></td>
+        <td>Zeile mit <span class="code">fin_qlf_qtr_rev='d'</span> + <span class="code">fin_qlf_ann_rev='10k'</span></td>
+        <td><span class="code">fiscal_period='FY'</span> + <span class="code">form='10-K'</span> &rarr; enthält implizit Q4</td>
+      </tr>
+      <tr>
+        <td><strong>FYE-Toleranz</strong></td>
+        <td>FYE-Monat &plusmn;1 Monat (52/53-Wochen-FY: DELL, HD, LOW, KR)</td>
+        <td><span class="code">companies.fiscal_year_end</span> (MMDD) vorhanden, Toleranzlogik muss implementiert werden</td>
+      </tr>
+      <tr>
+        <td><strong>Fallback</strong></td>
+        <td>NASDAQ-Quartalsdaten (<span class="code">fin_qtr_nas_rev</span>) als Notlösung</td>
+        <td>Kein Fallback. Nur SEC-Daten.</td>
+      </tr>
+      <tr>
+        <td><strong>Addierbare Felder</strong></td>
+        <td>7 Felder: rev, cor, opr, int, tax, net, shr</td>
+        <td>Relevante Felder in v_financials: revenue, net_income (für Screening genügen 2)</td>
+      </tr>
+      <tr>
+        <td><strong>EPS-Sonderregel</strong></td>
+        <td><span class="code">Q4_eps = Q4_net / annual_shr</span></td>
+        <td>eps_diluted in v_financials vorhanden, gleiche Logik anwendbar</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <hr class="section-divider">
+  <h2>Filter-Kaskade: Feiertag (6 Stufen vor dem Score)</h2>
+  <!-- ============================================================ -->
+
+  <div class="criterion external" style="padding: 14px 22px;">
+    <div class="detail" style="margin: 0;">
+      Die Feiertag-Kaskade filtert VOR dem Scoring. Alle 6 Stufen sind technisch und brauchen <strong>Kursdaten</strong> (nicht SEC):<br><br>
+      <strong>Stufe 1:</strong> Preis &ge; $20 + Vol &ge; 500K + 2-von-3 Liquiditätsregel (<span class="code">liquidity_check()</span>)<br>
+      <strong>Stufe 2:</strong> Kurs &gt; SMA200<br>
+      <strong>Stufe 3:</strong> SMA200 steigend (vs. 20 Tage zuvor)<br>
+      <strong>Stufe 4:</strong> Kurs &gt; SMA50 + Golden Cross (mit 5% Toleranz)<br>
+      <strong>Stufe 5:</strong> Max. 25% unter 52-Wochen-Hoch<br>
+      <strong>Stufe 6:</strong> 3-Monats-Performance &gt; 0%<br><br>
+      <span class="warn">&rarr; Alle 6 Stufen: Keine SEC-Daten involviert. Reine Kursdaten-Pipeline.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <hr class="section-divider">
+  <h2>XBRL-Konzept-Mapping: Feiertag &harr; sec_data.db</h2>
+  <!-- ============================================================ -->
+
+  <div class="summary">
+    <table>
+      <tr>
+        <th>Kennzahl</th>
+        <th>Feiertag-Feld</th>
+        <th>sec_data.db Feld</th>
+        <th>XBRL-Konzept(e)</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td><strong>Revenue</strong></td>
+        <td><span class="code">fin_qtr_rev</span></td>
+        <td><span class="code">v_financials.revenue</span></td>
+        <td>Revenues, RevenueFromContractWithCustomer…</td>
+        <td><span class="ok">✓ Haupt-Mapping</span></td>
+      </tr>
+      <tr>
+        <td><strong>Net Income</strong></td>
+        <td><span class="code">fin_qtr_net</span></td>
+        <td><span class="code">v_financials.net_income</span></td>
+        <td>NetIncomeLoss</td>
+        <td><span class="ok">✓ 1:1 Match</span></td>
+      </tr>
+      <tr>
+        <td><strong>EPS (diluted)</strong></td>
+        <td><span class="code">fin_qtr_eps</span></td>
+        <td><span class="code">v_financials.eps_diluted</span></td>
+        <td>EarningsPerShareDiluted</td>
+        <td><span class="ok">✓ 1:1 Match</span></td>
+      </tr>
+      <tr>
+        <td><strong>Shares</strong></td>
+        <td><span class="code">fin_qtr_shr / fin_ann_shr</span></td>
+        <td><span class="code">v_financials.shares_weighted_avg</span></td>
+        <td>WeightedAverageNumberOfDilutedSharesOutstanding</td>
+        <td><span class="ok">✓ Vorhanden</span></td>
+      </tr>
+      <tr>
+        <td><strong>Dividend/Share</strong></td>
+        <td><span class="warn">nicht implementiert</span></td>
+        <td><span class="code">v_financials.dividend_per_share</span></td>
+        <td>CommonStockDividendsPerShareDeclared</td>
+        <td><span class="ok">✓ In sec_data.db</span></td>
+      </tr>
+      <tr>
+        <td><strong>Sektor</strong></td>
+        <td><span class="code">std_sector</span> (Yahoo GICS)</td>
+        <td><span class="code">companies.sic / sic_desc</span></td>
+        <td>—</td>
+        <td><span class="warn">SIC ≠ GICS</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <hr class="section-divider">
+  <h2>Gesamtergebnis: Datenquellen pro Kriterium</h2>
+  <!-- ============================================================ -->
+
+  <div class="summary">
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Kriterium</th>
+        <th>Punkte</th>
+        <th>Datenquelle</th>
+        <th>sec_data.db</th>
+        <th>Kursdaten (extern)</th>
+      </tr>
+      <tr>
+        <td>K01+02</td>
+        <td>Phase 2</td>
+        <td>2</td>
+        <td style="color:#ed8936;">Kursdaten</td>
+        <td>&cross;</td>
+        <td style="color:#48bb78;">&check; yfinance/IB</td>
+      </tr>
+      <tr>
+        <td>K03</td>
+        <td>Golden Cross</td>
+        <td>1</td>
+        <td style="color:#ed8936;">Kursdaten</td>
+        <td>&cross;</td>
+        <td style="color:#48bb78;">&check; yfinance/IB</td>
+      </tr>
+      <tr>
+        <td>K04</td>
+        <td>&lt;25% unter 52W-Hoch</td>
+        <td>1</td>
+        <td style="color:#ed8936;">Kursdaten</td>
+        <td>&cross;</td>
+        <td style="color:#48bb78;">&check; yfinance/IB</td>
+      </tr>
+      <tr>
+        <td>K05</td>
+        <td>&gt;25% über 52W-Tief</td>
+        <td>1</td>
+        <td style="color:#ed8936;">Kursdaten</td>
+        <td>&cross;</td>
+        <td style="color:#48bb78;">&check; yfinance/IB</td>
+      </tr>
+      <tr>
+        <td>K06+07</td>
+        <td>Revenue Growth YoY</td>
+        <td>1–2</td>
+        <td style="color:#48bb78;">SEC Filings</td>
+        <td style="color:#48bb78;">&check; v_financials.revenue</td>
+        <td>&cross;</td>
+      </tr>
+      <tr>
+        <td>K08</td>
+        <td>Earnings Growth YoY</td>
+        <td>1</td>
+        <td style="color:#48bb78;">SEC Filings</td>
+        <td style="color:#48bb78;">&check; v_financials.net_income</td>
+        <td>&cross;</td>
+      </tr>
+      <tr>
+        <td>K09</td>
+        <td>Keine Dividende</td>
+        <td>1</td>
+        <td style="color:#63b3ed;">SEC + Kurs</td>
+        <td style="color:#48bb78;">&check; dividend_per_share</td>
+        <td>Kurs für Yield</td>
+      </tr>
+      <tr>
+        <td>K10</td>
+        <td>Tech Sektor</td>
+        <td>1</td>
+        <td style="color:#63b3ed;">SEC + Yahoo</td>
+        <td>SIC (≠ GICS)</td>
+        <td>Yahoo Sektor</td>
+      </tr>
+      <tr>
+        <td>K11</td>
+        <td>3M-Performance</td>
+        <td>1</td>
+        <td style="color:#ed8936;">Kursdaten</td>
+        <td>&cross;</td>
+        <td style="color:#48bb78;">&check; yfinance/IB</td>
+      </tr>
+      <tr style="border-top: 2px solid #4a5568;">
+        <td colspan="2"><strong>SUMME</strong></td>
+        <td><strong>11</strong></td>
+        <td></td>
+        <td><strong style="color:#48bb78;">3 Kriterien (4 Pkt)</strong></td>
+        <td><strong style="color:#ed8936;">6 Kriterien (7 Pkt)</strong></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <hr class="section-divider">
+  <h2>Handlungsbedarf für Screening-Engine (Agent B)</h2>
+  <!-- ============================================================ -->
+
+  <div class="criterion sec-ready" style="border-left-color: #63b3ed;">
+    <div class="detail" style="margin: 0;">
+      <strong>1. SEC-Daten (sec_data.db) — sofort nutzbar:</strong><br>
+      &bull; Revenue YoY Growth: <span class="code">v_financials.revenue</span> mit <span class="code">fiscal_period</span> + <span class="code">form</span><br>
+      &bull; Earnings YoY Growth: <span class="code">v_financials.net_income</span><br>
+      &bull; Dividenden-Check: <span class="code">v_financials.dividend_per_share = 0</span> → keine Dividende<br>
+      &bull; 10-K-Regel implementieren: FY-Wert minus 3× 10-Q = Q4<br>
+      &bull; XBRL-Fallback für Revenue ergänzen (RevenueFromContract… als Alternative)<br><br>
+
+      <strong>2. Kursdaten (externe Pipeline) — parallel aufbauen:</strong><br>
+      &bull; yfinance Batch-Download (wie Feiertag-System)<br>
+      &bull; SMA50, SMA200, 52W-High/Low, 3M-Performance berechnen<br>
+      &bull; Phase-2-Check, Golden-Cross-Check, Liquiditätscheck<br>
+      &bull; Optional: IB API für Realtime-Kurse<br><br>
+
+      <strong>3. Offene Punkte:</strong><br>
+      &bull; SIC→GICS Mapping für Sektor-Kriterium (oder Yahoo-Daten beibehalten)<br>
+      &bull; FYE-Toleranz (&plusmn;1 Monat) für 52/53-Wochen-Fiskaljahre<br>
+      &bull; Qualifier-System: Tracking ob Q4-Daten berechnet oder direkt sind<br>
+      &bull; Score-Threshold: 8/11, 7/10, 7/9 (dynamisch je nach verfügbaren Daten)<br>
+    </div>
+  </div>
+
+  <div class="footer">AI Artifakte &middot; Präziser Abgleich Feiertag &harr; SEC &middot; v1.0 &middot; 28.03.2026</div>
+
+</div>
+</body>
+</html>
